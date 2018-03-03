@@ -1,0 +1,3132 @@
+---------------------------------
+	LONG-TERM GOALS
+---------------------------------
+
+Learn how to
+[x] calculate stress
+[ ] calculate elastic constants
+	[X] elastic tensor
+	[ ] double check
+[ ] get piezoelectric coefficients d and e
+	[ ] piezoelectric tensor
+	[ ] e_ij max and crystallographic direction
+
+For efficiency, learn how to
+[x] extract optimum cell dimensions and atomic positions from optimization runs
+	[x] calculate lattice constants from atomic positions
+	[x] calculate interaxial angles from atomic positions
+[ ] automate best input parameters
+	[X] cutoff energies
+	[ ] k-point grid
+[ ] automate inputting k-point-path of highest symmetry and plotting band structure with labels
+	[ ] plot band structure
+	[ ] band gap
+[ ] automate DOS
+[ ] automate charge density plot for any plane
+
+Benchmark
+[ ] Sabel
+[ ] Yoda w/ GPUs
+
+Relevant piezoelectric coefficients:
+e_31	stress along x with E-Field from z
+e_33	stress along z with E-Field from z
+e_15	stress along x with E-Field from x
+
+[x] Use similar pseudopotentials for all atoms of BaNiO3
+
+a = 10.4738345624 alat
+b = 10.4738345665 alat
+c = 9.16687610158 alat
+
+-----------------------------------------------------------------------------------------------------------------------------------
+						Piezoelectricity Flowchart (Shi 2014)
+-----------------------------------------------------------------------------------------------------------------------------------
+Procedure
+1. Optimize structure until forces are less than 5 meV/Ang
+2. Vary strain along [001] direction from -0.5% to +0.5%
+3. Optimize perpendicular lattice vectors and internal atomic positions until stresses (sigma_11, sigma_22) are smaller than 0.01 GPa
+4. Calculate polarization via Berry phase
+5. Use a finite difference method to get d_33 = dP/dsigma_3
+
+-----------------------------------------------------------------------------------------------------------------------------------
+						      To Do for SPP 2017
+-----------------------------------------------------------------------------------------------------------------------------------
+For revision
+[x] Abstract is not concise and difficult to comprehend.
+[x] In your introduction, the last sentence of your second paragraph poses a strong claim. Maybe you could cite their work for this sentence instead for the latter one.
+[x] You could put the details like the functionals you used in the methodology part, not in the introduction. For the results and discussion.
+	[x] Details like functionals so functionals (duh)
+	[x] Pati na rin ba yung details ng AtomPAW?
+[x] Referring to the discussion on Fig. 2, you are once again assuming that the reader knows the results from Materials Project. You could have put a reference here if you do not want to include the plot from Materials project.
+[x] How were you able to get the temperature increase? No sufficient method or data presented for this claim. And what energy difference you obtained to say that the energy difference is negligible.
+[x] 5.78% more than expected? from what reference?
+
+
+Materials Project
+-----------------
+158 	63 	29 	0 	0 	0
+63 	158 	29 	0 	-0 	0
+29 	29 	208 	0 	0 	0
+0 	0 	0 	4 	0 	-0
+0 	0 	0 	0 	4 	0
+0 	0 	0 	0 	0 	47
+
+Relax Atomic Positions + Green-Lagrange Strain
+----------------------------------------------
+153	59	35	0	0	0
+59	153	35	0	0	0
+35	35	233	0	0	0
+0	0	0	3	0	0
+0	0	0	0	3	0
+0	0	0	0	0	47
+
+Relaxing Atomic Positions	(*as C_{66} = (C_{11} - C_{12})/2 )
+-------------------------
+153	59	35	0	0	27
+59	153	35	0	0	-27
+35	35	233	0	0	0
+0	0	0	?	?	?
+0	0	0	?	?	?
+27	-27	0	?	?	47*
+
+Relax Atomic Positions + Green-Lagrange Deformation via plot	(*as C_{66} = (C_{11} - C_{12})/2 )
+------------------------------------------------------------
+153	62	36	0	0	0
+62	153	36	0	0	0
+36	36	236	0	0	0
+0	0	0	?	?	?
+0	0	0	?	?	?
+0	0	0	?	?	46*
+
+Variable-Cell Relaxation	(***C_{13} and C_{23} values have R^2=0.002 where the stresses are almost zero)
+------------------------
+?	?	-1***	?	?	?
+?	?	-1	?	?	?
+-1	-1	219	?	?	?
+?	?	?	?	?	?
+?	?	?	?	?	?
+?	?	?	?	?	?
+
+No Relaxation
+-------------
+233	69	74	?	?	?
+69	233	74	?	?	?
+74	74	265	?	?	?
+?	?	?	?	?	?
+?	?	?	?	?	?
+?	?	?	?	?	?
+
+
+To Do
+[X] Test stress vs strain script for general n strain dirs and m stress dirs
+	[X] Stress: 1 2 3		Strain: 1 2 3 4 5
+	[X] Stress: 1 2 3 4		Strain: 1 2 3
+	[X] Stress: 2 3 4		Strain: 1 2 3 4
+	[X] Stress: 1 2 3 4		Strain: 2 3 4
+	[X] Stress: 2 3 4		Strain: 3 4 5 6
+	[X] Stress: 1 3 5		Strain: 2 4
+	[X] Stress: 2 4			Strain: 3 5 6
+	[X] Stress: 4			Strain: 2 3 4 5 6
+	[X] Stress: 2 3 4 5 6		Strain: 3
+[X] Transfer stress vs strain code to banio3.plot.sh
+[X] Double check C values for all plots
+	[X] Code it such that C_ij gets stored and can be outputted
+	[X] Output elastic properties
+
+C: (GPa)
+1.52636400e+02   5.90421600e+01   3.53316800e+01   1.17680000e-02   1.47100000e-02   7.06120000e-02
+5.90421600e+01   1.52444980e+02   3.53316800e+01   2.05940000e-02   4.00000000e-06   7.94340000e-02
+3.53316800e+01   3.53316800e+01   2.33500200e+02  -1.17700000e-02   2.05960000e-02   7.06080000e-02
+1.17680000e-02   2.05940000e-02  -1.17700000e-02   2.98329620e+00    0.00000000e+00   0.00000000e+00
+1.47100000e-02   4.00000000e-06   2.05960000e-02   0.00000000e+00    3.13628600e+00   0.00000000e+00
+7.06120000e-02   7.94340000e-02   7.06080000e-02   0.00000000e+00    0.00000000e+00   4.65028800e+01
+
+s: (10^-9 Pa)
+7.83150880e-03  -2.85875927e-03  -7.52439152e-04  -1.41266952e-05   -3.17869042e-05  -5.86603651e-06
+-2.85875927e-03   7.84170481e-03  -7.53987348e-04  -4.58300523e-05    1.83497632e-05  -7.90913880e-06
+-7.52439152e-04  -7.53987348e-04   4.51059885e-03   2.59686141e-05   -2.60910191e-05  -4.41824032e-06
+-1.41266952e-05  -4.58300523e-05   2.59686141e-05   3.35200177e-01   -1.04219631e-07   6.03056557e-08
+-3.17869042e-05   1.83497632e-05  -2.60910191e-05  -1.04219631e-07    3.18848793e-01   5.65379277e-08
+-5.86603651e-06  -7.90913880e-06  -4.41824032e-06   6.03056557e-08    5.65379277e-08   2.15040736e-02
+
+K_V: 88.6658466667
+K_R: 87.3100063043
+G_V: 37.78289644
+G_R: 7.05930480959
+K_VRH: 87.9879264855
+G_VRH: 22.4211006248
+AU: 21.7765894104
+mu: 0.382564851442
+
+For strains -1% -0.5% 0% 0.5% +1%
+
+Elastic stiffness tensor C in GPa (with QE 5.3)
+------------------------------------------------
+153	59	35	0	0	0
+59	153	35	0	0	0
+35	35	234	0	0	0
+0	0	0	3	0	0
+0	0	0	0	3	0
+0	0	0	0	0	47
+
+Elastic stiffness tensor C in GPa (with QE 6.1)
+------------------------------------------------
+154	59	35	0	0	0
+59	154	35	0	0	0
+35	35	236	0	0	0
+0	0	0	1	0	0
+0	0	0	0	1	0
+0	0	0	0	0	47
+
+Elastic stiffness tensor C in GPa (with local QE 6.0)
+-----------------------------------------------------
+154	59	35	0	0	0
+59	154	35	0	0	0
+35	35	236	0	0	0
+0	0	0	1	0	0
+0	0	0	0	1	0
+0	0	0	0	0	47
+
+Elastic stiffness tensor C in GPa (Materials Project)
+-----------------------------------------------------
+158 	63 	29 	0 	0 	0
+63 	158 	29 	0 	-0 	0
+29 	29 	208 	0 	0 	0
+0 	0 	0 	4 	0 	-0
+0 	0 	0 	0 	4 	0
+0 	0 	0 	0 	0 	47
+
+Elastic compliance tensor s in 10^(-12) Pa^(-1) (with QE 5.3)
+-------------------------------------------------------------
+7.8 	-2.8 	-0.7 	0 	0 	0
+-2.8 	7.8 	-0.7 	0 	0 	0
+-0.7 	-0.7 	4.5 	0 	0 	0
+0 	0 	0 	333.3 	0 	0
+0 	0 	0 	0 	333.3 	0
+0 	0 	0 	0 	0 	21.3
+
+Elastic compliance tensor s in 10^(-12) Pa^(-1) (with QE 6.1)
+-------------------------------------------------------------
+7.8 	-2.8 	-0.7 	0 	0 	0
+-2.8 	7.8 	-0.7 	0 	0 	0
+-0.7 	-0.7 	4.5 	0 	0 	0
+0 	0 	0 	769 	0 	0
+0 	0 	0 	0 	769 	0
+0 	0 	0 	0 	0 	21.2
+
+Elastic compliance tensor s in 10^(-12) Pa^(-1) (with local QE 6.0)
+-------------------------------------------------------------------
+7.8 	-2.8 	-0.7 	0.1 	0.1 	0
+-2.8 	7.8 	-0.7 	0.1 	0.2 	0
+-0.7 	-0.7 	4.5 	0 	0.1 	0
+0.1 	0.1 	0 	769 	0 	0
+0.1 	0.2 	0.1 	0 	769 	0
+0 	0 	0 	0 	0 	21.2
+
+Elastic compliance tensor s in 10^(-12) Pa^(-1) (Materials Project)
+--------------------------------------------------------------------
+7.6 	-2.9 	-0.7 	0 	0 	0
+-2.9 	7.6 	-0.7 	0 	-0 	0
+-0.7 	-0.7 	5 	0 	0 	0
+0 	0 	0 	230.6 	0 	-0
+0 	0 	0 	0 	230.6 	0
+0 	0 	0 	0 	0 	21.1
+
+Elastic properties			Units		QE 5.3		QE 6.1		local QE 6.0	MP
+----------------------------------------------------------------------------------------------------------------
+Bulk modulus Voigt average, K_{V} 	GPa 		89		89		89		85
+Bulk modulus Reuss average, K_{R} 	GPa 		87		87		88		85
+Shear modulus Voigt average, G_{V} 	GPa 		38		38		38		38
+Shear modulus Reuss average, G_{R} 	GPa 		7		3		3		10
+Bulk modulus VRH average, K_{VRH} 	GPa 		88		88		88		85
+Shear modulus VRH average, G_{VRH} 	GPa 		22		20		20		24
+Universal elastic anisotropy, A^{U}	none		21.78		54.79		54.79		14.57
+Isotropic Poisson ratio, \mu 		none		0.38		0.39		0.39		0.37
+
+[X] Update banio3.piezo.sh for any changes for stress vs strain code
+[X] Multidimensional energy curves
+	[X] Get curves
+	[X] Transfer to banio3.plot.sh
+	[X] Compatibility with banio3.piezo.sh
+[X] Multidimensional polar vs strain/c curves
+	[X] Verify if multipolar data gathering works in banio3.test.sh "cp ../Plot/banio3.3.-0.005.* ./"
+		[X] Run a script for copying and removing files from scf
+		[X] Determine which files are needed for nscf
+		[X] Run again scf (ugh)
+		[X] Run with polar_dirs=(1 2 3)
+		[X] Check if polar_plot makes sense
+	[X] Transfer to banio3.piezo.sh
+	[X] Check compatibility with banio3.plot.sh
+	[X] Rename berry files "for x in *.berry.out; do mv $x ${x%.berry.out}.berry-3.out; done"
+	[X] Run calcs for scf again then berry-1 and berry-2
+	[X] Develop multipolar plotting vs strain
+
+"for x in banio3.*.scf.out; do mv $x banio3.scf.${banio3.x%.scf.out}.out; done"
+
+[X] !! Add symmetry features so you don't need to get strains for all 6 dirs !!
+	[X] Symmetry for stress-strain
+		[X] Implement for banio3.test2.sh
+		[X] Transfer to banio3.plot.sh
+	[X] Symmetry for polarization vs stress/strain
+		[x] Plot berry gdir1 gdir2 gdir3 in one graph
+		[x] Piezoelectric point groups not in MP: 422, 622
+			[[	0	0	0	e_14	0	0]
+			 [	0	0	0	0	-e_14	0]
+			 [	0	0	0	0	0	0]]
+
+Crystal System	Point Group	Minimum dirs		Script
+--------------	-----------	------------------	------
+Cubic		23, -43m	4/5/6			4			(1, 4)	
+Tetragonal	-42m		4/5, 6			4, 6			(1, 4), (3, 6)
+Tetragonal	-4		1/2, 4/5, 6		1, 4, 6			(3, 1), (1, 4), (2, 4), (3, 6)
+Hexagonal	-6m2		1/2/6			1			(2, 1)
+Hexagonal	-6		1/2/6			1			(1, 1), (2, 1)
+Hexagonal	6mm		1/2, 3, 4/5		1, 3, 4			(3, 1), (3, 3), (2, 4)
+Tetragonal	4mm		1/2, 3, 4/5		1, 3, 4			(3, 1), (3, 3), (2, 4)
+Hexagonal	6		1/2, 3, 4/5		1, 3, 4			(3, 1), (3, 3), (1, 4), (2, 4)
+Tetragonal	4		1/2, 3, 4/5		1, 3, 4			(3, 1), (3, 3), (1, 4), (2, 4)
+Hexagonal	622		4/5			4			(1, 4)
+Tetragonal	422		4/5			4			(1, 4)
+Trigonal	3m		1/2, 3, 4/5		1, 3, 4			(2, 1), (3, 1), (3, 3), (2, 4)
+Trigonal	32		1/2/6, 4/5		1, 4			(1, 1), (1, 4)
+Trigonal	3		1/2, 3, 4/5		1, 3, 4			(1, 1), (2, 1), (3, 1), (3, 3), (1, 4), (2, 4)
+Orthorhombic	mm2		1, 2, 3, 4, 5		1, 2, 3, 4, 5		(3, 1), (3, 2), (3, 3), (2, 4), (1, 5)
+Orthorhombic	222		4, 5, 6			4, 5, 6			(1, 4), (2, 5), (3, 6)
+Monoclinic	m		1, 2, 3, 4, 5, 6	1, 2, 3, 4, 5, 6	marami
+Monoclinic	2		1, 2, 3, 4, 5, 6	1, 2, 3, 4, 5, 6	marami
+Triclinic	1		1, 2, 3, 4, 5, 6	1, 2, 3, 4, 5, 6	all
+
+
+
+
+
+
+Piezoelectric stress tensor e in C/m^2 (Materials Project)
+--------------------------------------------------------------------
+0.00000		0.00000		0.00000		0.00000		0.03839		0.00000
+0.00000		0.00000		0.00000		0.03839		0.00000		0.00000
+6.89822		6.89822		27.46280	0.00000		0.00000		0.00000
+
+
+[ ] Plot polarization vs stress
+[ ] Find out how to calculate the dielectric constant
+	[ ] Check out Materials Project!
+
+For future work for double checking C_ij
+[X] Updated script on symmetry for stress vs strain curves
+#############################################################################################
+for i in xrange(strainlen):
+	for j in xrange(stresslen):
+		linfit = np.polyfit(xData, yData[i][j], 1)
+		quadfit = np.polyfit(xData, yData[i][j], 2)
+		print "\nLinear C%s%s: %s" % (stressdir[j], straindir[i], linfit[0])
+		print "Quadratic C%s%s: %s\tLin: %s" % (stressdir[j], straindir[i], 2*quadfit[0], quadfit[1])
+#############################################################################################
+
+Broad (-1% to 1%, steps of 0.1%) QE6.0 for dirs 4 and 5:
+stress 4 - strain 4: $ y\ =\ 1.3126746429x + 0.0001891431$
+$ R^2\ =\ 0.9661861572$
+stress 5 - strain 5: $ y\ =\ 1.2740847779x + 0.0004273043$
+$ R^2\ =\ 0.9569993805$
+
+Broad (-0.1% to 0.1%, steps of 0.01%) QE6.0 for dirs 4 and 5:
+stress 4 - strain 4: $ y\ =\ 8.4461384156x + -0.0011628321$
+$ R^2\ =\ 0.3564201964$
+stress 5 - strain 5: $ y\ =\ 8.7269614935x + -0.0001541216$
+$ R^2\ =\ 0.2590651776$
+
+
+Benchmarking
+[X] Compare 5.3, 5.4 (w/ and w/o fftw3), and 6.1 (w/ and w/o fftw3) with a script
+	[x] SCF
+	[x] VC-Relax
+[X] Also try "export OMP_NUM_THREADS=1"
+[x] Change all scripts to 6.0
+	[x] banio3.piezo.sh
+	[x] banio3.plot.sh
+	[x] banio3.test.sh
+[ ] Benchmark Yoda with my own system
+	[ ] Cores+Threads vs Wall Time
+	[ ] MPI Processes vs Wall Time
+	[ ] Threads vs Wall Time
+	[ ] Cores+Threads vs Speed-up
+	[ ] MPI Processes vs Speed-up
+	[ ] Threads vs Speed-up
+
+#Reading stresses
+scffile="$filename.${strain_dirs[$dir-1]}.${strain_arr[$delta-1]}.scf.out"
+echo "Stresses from self-consistent field calculation (in GPa):" >> $output
+str=$(grep -n "total   stress" $scffile | tail -1 | cut -f1 -d:)
+str=$(sed -n "$((str+1)),$((str+3))p" $scffile)
+read sigma1 sigma2 sigma3 sigma4 sigma5 sigma6 <<<$(echo $str | awk '{print $1*conv, $8*conv, $15*conv, $9*conv, $3*conv, $2*conv}' conv=$Rybohr3toGPa)
+echo -e "sigma_1: $sigma1\t sigma_2: $sigma2\t sigma_3: $sigma3\t sigma_4: $sigma4\t sigma_5: $sigma5\t sigma_6: $sigma6\n" >> $output
+sigma_arr=($sigma1 $sigma2 $sigma3 $sigma4 $sigma5 $sigma6)
+
+[ ] Get optimum configuration of each PC in SanD - ask Celso ulit haha
+
+	Name	MPI processes	Threads per MPI process		   Arch				GPU
+------------------------------------------------------------------------------------------------------------------
+	Yoda		6x2		2	Intel(R) Xeon(R) CPU E5-2620 0 @ 2.00GHz	1070
+	Doris		4		1		i5-3470 CPU @ 3.20GHz × 4		n/a
+	Sabel		4		1		i5-3470 CPU @ 3.20GHz × 4		n/a
+	Anakin		2		2		i3-3210 CPU @ 3.20GHz x 4		n/a
+	Leia		2		2		i3-3210 CPU @ 3.20GHz x 4		n/a
+	Quigon		?		?			    ?
+	Revan		2		2		i3-3210 CPU @ 3.20GHz x 4		n/a
+	Luke		2		2		i3-3210 CPU @ 3.20GHz x 4		n/a
+	Legolas		4		1		i5-4690 CPU @ 3.50GHz x 4	GeForce GTX 760/PCIe/SSE2
+	Aragorn		4		1		i5-4690 CPU @ 3.50GHz x 4	GeForce GTX 760/PCIe/SSE2
+	Frodo		4		1		i5-4690 CPU @ 3.50GHz x 4	GeForce GTX 760/PCIe/SSE2
+	Bilbo		4		1		i5-4690 CPU @ 3.50GHz x 4		n/a
+	Spock		?		?			    ?
+	Kirk		4		2		i7-4790 CPU @ 3.60GHz x 8	GeForce GTX 760/PCIe/SSE2
+
+[X] Try out newly installed on Yoda (07.04.17)
+	[X] Yoda QE 6.1 -> Still gives IEEE_DIVIDE_BY_ZERO
+	[X] Yoda QE 6.0 -> Good
+	[X] Be aware about the changes from 6.0 to 6.1
+[ ] Learn how to run on Yoda (Best: 6 cores with 2 threads each)
+	[ ] Learn how to do SBATCH
+	[ ] scf
+		[ ] 1 MPI, 1 threads per MPI
+		[ ] 2 MPI, 1 threads per MPI
+		[ ] 1 MPI, 2 threads per MPI
+		[ ] 2 MPI, 2 threads per MPI
+	[ ] vc-relax
+		[ ] 1 MPI, 1 threads per MPI
+		[ ] 2 MPI, 1 threads per MPI
+		[ ] 1 MPI, 2 threads per MPI
+		[ ] 2 MPI, 2 threads per MPI
+[ ] MPIRUN with GPUs: salloc -p A -n $mpis -c $threads --gres=gpu:$gpus mpirun -np $mpis pw.x < $filename.scf.in > $filename.mpi$mpis.thr$threads.cuda$cuda.scf.out
+
+
+[X] QE 6.1
+	[X] OpenMPI 2.0.1 (OpenMP enabled + GCC + SLURM) + MKL
+		[X] './configure --enable-openmp' then 'make -j4 pw pp upf' -> got IEEE_DIVIDE_BY_ZERO
+	[X] OpenMPI 2.0.1 (OpenMP enabled + GCC + SLURM)
+		[X] './configure --enable-openmp' then 'make -j4 pw' -> got IEEE_DIVIDE_BY_ZERO
+	[X] OpenMPI 1.10.0 (OpenMP enabled) + GCC + SLURM + MKL
+		[X] './configure --enable-openmp' then 'make -j4 pw' -> got IEEE_DIVIDE_BY_ZERO
+	[X] OpenMPI 2.0.1 (+ GCC + SLURM) + MKL
+		[X] './configure' then 'make -j4 pw' -> got IEEE_DIVIDE_BY_ZERO
+	[X] OpenMPI 2.0.1 (+ GCC + SLURM)
+		[X] './configure' then 'make -j4 pw' -> got IEEE_DIVIDE_BY_ZERO
+	[X] OpenMPI 1.10.0 + GCC + SLURM + MKL
+		[X] './configure' then 'make -j4 pw'
+[X] QE 5.4
+	[X] OpenMPI 2.0.1 (OpenMP enabled + SLURM) + GCC + MKL 
+		[X] './configure --enable-openmp' then 'make -j4 pw pp upf' -> worked for both scf and vcrelax! The QE version 6.1 may have the problem
+
+[X] QE 6.0
+	[X] OpenMPI 2.0.1 (OpenMP enabled + GCC + SLURM) + MKL
+		[X] './configure --enable-openmp' then 'make -j4 pw pp upf' -> worked for scf!
+		[X] ./banio3.qe-6.0-vc.sh
+
+Current directories:
+- Archive: old test directories that may be useful
+- Bands: Plotting the band structure of BaNiO3
+- Piezo: Calculating relax, scf, and berry calcs using v6.0
+- Plot: Plotting data from Piezo
+- Scripts: Repository of scripts that may be useful
+- Standard: Unit cell from QE v6.0 variable-cell relaxation
+
+Piezoelectric coefficient
+[X] Run on 6.0
+	[X] 1, 2, 3, 4, 5, 6
+	[X] Do make all for QE 6.0
+	[ ] Plot all
+[ ] Complete 5.3.0
+	[-] ./banio3.test1-1.sh
+	[ ] ./banio3.test1-2.sh
+[ ] Try out 5.4.0
+	[ ] ./banio3.piezo5.4-1-vc.sh (does vcrelax and then banio3.piezo5.4-2.sh without vcrelax)
+[ ] If I run on sensei w/o srun, does it go to Yoda or to Sabel?
+[ ] Figure out what's the difference with my results from 5.3 and 6.0
+	[ ] Shear stress too small
+		[ ] Double check implementation of obtaining C_44 and C_55
+		[ ] 
+	[ ] Polarization what
+
+Automation
+[ ] Convergence
+	[ ] k-points
+	[ ] Cut-off Energy
+	[ ] Convergence Threshold
+[ ] Post-processing
+	[ ] Band Structure
+	[ ] Density of States
+	[ ] Charge Density
+
+Cleaning
+[ ] AtomPAW
+	[X] Find out which version I used to make the PAW datasets
+	[X] Delete the others
+	[X] Documentation ftw
+[ ] VESTA
+	[X] How does the VESTA Launcher come about? Kasama na ba sa pagbuild? -> Independent
+	[-] Documentation ftw
+[ ] XCrysDen
+	[ ] Ask Kuya Mel / Ate Alex haha
+[ ] SPP 2016 Mn3GaN
+	[ ] Face those files man
+
+Literature Review
+[ ] Piezoelectric ab initio / first principles / Quantum ESPRESSO
+
+DFT Review
+[ ] Electronic Structure by Martin
+[ ] Everything about DFT and QE
+
+Other Materials
+[ ] SrNiO3 - says sir
+	[X] Need Sr PAW!
+[ ] BaTiO3 - double check calculation of d
+	[X] Need Ti PAW!
+[ ] PbTiO3 - double check calculation of d
+	[X] Need Pb PAW!
+[ ] KNbO3 - double check calculation of d
+	[X] Need K PAW!
+	[X] Need Nb PAW!
+
+Shear strain double check
+[ ] Minimal working example
+
+				C_11	C_12	C_44
+-----------------------------------------------------
+Original measurements*
+	McSkimin		165.7	63.9	79.6
+	Prasad and Wooster	168.0	66.0	84.0
+	McSkimin and Andreatch	165.8	63.9	79.6
+	Hall			165.6	63.9	79.5
+Handbook values*
+	Metals Ref Book 5th	168.0	66.0	84.0
+	Smithells MRB 6th	165.0	64.0	79.2
+	Landolt-Bornstein	165.0	64.0	79.3
+	CRC Handbook 76th	165.8	63.9	79.6
+	Theory of Dislocations	165.7	63.9	79.6
+Materials Project
+	VASP			144	53	75
+Own work
+	5.3+OpenMPI/1.10.0	152	55	74	
+	6.0+OpenMPI/2.0.1	152	55	74
+
+*from ding2002 Experimental and theoretical study of Young modulus in micromachined polysilicon films
+
+What I have done:
+1. QE 5.3 Berry-phase polarization along direction 3 only
+
+Created a script for any of the 3 directions
+
+2. QE 6.0 Berry-phase polarization along directions 1, 2, 3
+
+3. QE 5.3 Berry-phase polarization along directions 1, 2 only. Reused relax data and recalculated scf wavefunctions before doing Berry-phase polarization
+
+
+Currently (07.18.17)
+--------------------
+
+[ ] Yoda (not slurm): Si on QE 6.0
+	[ ] Should I try increasing the cut-off energy?
+
+[ ] How to SBatch
+	[X] QE 6.0 +openmpi/1.10.0 +OpenMP=2 ------------> WORKED	6.0-ompi1-omp2
+	[X] QE 6.0 +openmpi/1.10.0 ----------------------> WORKED	6.0-ompi1		OpenMPI 1.10.0 works with SBatch!
+	[X] QE 6.0 +openmpi/2.0.1 +OpenMP=1or2 ----------> FAILED	6.0-ompi2-omp1/2
+	[X] QE 5.3 +openmpi/2.0.1 +OpenMP=1 -------------> FAILED	5.3-ompi2-omp1
+	[X] QE 5.3 +openmpi/2.0.1 -----------------------> FAILED	5.3-ompi2 		It seems like OpenMPI 2.0.1 is the problem
+	[X] QE 5.3 +openmpi/1.10.0 +OpenMP=2 ------------> WORKED	5.3-ompi1-omp2
+	[X] QE 5.3 +openmpi/1.10.0 +OpenMP=1 ------------> WORKED	5.3-ompi1-omp1
+	[X] QE 5.3 +openmpi/1.10.0 ----------------------> WORKED	5.3-ompi1
+	[X] QE 5.3 +fftw3 +openmpi/1.10.0 ---------------> WORKED	5.3-ompi1-fftw3
+---> this means that I can sbatch parallel on Yoda! but I can't use GPUs because qe/6.0-nvblas is built with OpenMPI 2.0.1
+
+---> QE5.3 P1 by E1 slightly different (by ~1e-8 C/m^2) for E=0.005 between OMP 1 and OMP2
+---> QE6.0 OMP1 and OMP2 (wrt QE5.3 OMP1)
+	P1 by E1 became positive for E=0.005 and E=0.01
+	P1 by E4 became more negative for E=-0.01, more positive for E=0.05, less positive for E=0.01
+	P2 by E1 became positive for E=0.005
+	P2 by E4 became positive for E=-0.01, less positive for E=0.01
+	P3 by E1 became less positive for E=-0.005 and E=-0.005, more positive for E=0.01
+	P3 by E4 became more positive for E=-0.01 and E=0.01
+
+banio3.piezo5.3_2.sh
+[ ] Yoda w/ SLURM:
+	[X] pang@sensei ---------------------------------------------------> WORKS! but with 5 min lag time
+		OpenMPI 1.10.0
+		"salloc -p A -n 4 mpirun -np 4 /home/sand/pang/espresso-5.3.0/bin/pw.x" 
+		if [[ -z $plotrange && $output != "$filename.berry-only.txt" ]]; then
+		$runprefix < $filename.relax.in > $relfile
+		fi
+		if [ -d "save_temp" ]; then chmod -R a+w ./save_temp; rm -r ./save_temp; fi
+
+	[X] pang@sensei ---------------------------------------------------> WORKS! but with 5 min lag time
+		OpenMPI 1.10.0
+		"salloc -p A -n 4 mpirun -np 4 pw.x"
+		if [[ -z $plotrange && $output != "$filename.berry-only.txt" ]]; then
+		$runprefix < $filename.relax.in > $relfile
+		fi
+		if [ -d "save_temp" ]; then chmod -R a+w ./save_temp; rm -r ./save_temp; fi
+
+	[X] pang@sensei ---------------------------------------------------> runs the others even without first finishing
+		OpenMPI 1.10.0
+		"salloc -p A -n 4 mpirun -np 4 pw.x"
+		if [[ -z $plotrange && $output != "$filename.berry-only.txt" ]]; then
+		$runprefix < $filename.relax.in > $relfile &
+		fi
+		if [ -d "save_temp" ]; then chmod -R a+w ./save_temp; rm -r ./save_temp; fi
+
+	[X] pang@sensei ./banio3.sh & -------------------------------------> WORKS! but with 5 min lag time for each process
+		OpenMPI 1.10.0
+		"salloc -p A -n 4 mpirun -np 4 pw.x"
+		Woah it's stil ongoing
+	
+	[X] pang@doris ./banio3.sh ----> Started immediately but already started job for the next, died when window was closed
+
+	[X] pang@sensei sbatch banio3.sh & --------------------------------> WORKS! NO 5 MIN LAG TIME, NO TERMINAL KILL WAIT TIME
+		OpenMPI 1.10.0
+		"salloc -p A -n 4 mpirun -np 4 pw.x"
+		if [ ! -f $convfile ]; then $runprefix pw.x < $filename.vcrelax.in > $convfile; fi
+		if [ -d "save_temp" ]; then rm -r ./save_temp; fi
+
+	[ ] !!! Check loop continuity for "./banio3.sh &" and "sbatch banio3.sh &"
+
+test.sh
+[ ] Yoda w/ SLURM:
+	[ ] pang@sensei
+		""
+
+
+[ ] Sabel: Repeat QE 5.3 calcs with correct Berry
+
+[ ] Shear strain might be a problem. It depends on the implementation in general for non-cubic cells
+	[ ] Si with QE 5.3 at E_cut = 73 Ry ---> I don't think there's a great difference for Si
+	[ ] Si with QE 6.0 at E_cut = 73 Ry ---> check if these have a difference for Si
+	[ ] BaNiO3 with QE 5.3 fix berry-3
+	[X!] BaNiO3 with QE 6.0 for (-0.1 -0.09 -0.08 -0.07 -0.06 -0.05 -0.04 -0.03 -0.02 0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.1) !
+
+[ ] Shear
+	BaNiO3
+	[ ] Watch out if other strains are getting larger for 4 for QE6.0 for +/- 0.1 --------------------------> piezo6.0
+	[ ] Check if QE6.0 for -0.06 -0.03 0.00 0.03 0.06 is sufficient for dir 4
+	[ ] Verify if QE5.3 for -0.06 -0.05 -0.04 -0.03 -0.02 0.02 0.03 0.04 0.05 0.06 works for dir 4 ---------> piezo5.3
+	[ ] Check if QE5.3 for -0.06 -0.03 0.00 0.03 0.06 is sufficient for dir 4
+	[ ] Double check QE6.0 for -0.06 -0.03 0.03 0.06 for dirs 5 6 ------------------------------------------> piezo6.0
+	[ ] Double check QE5.3 for -0.06 -0.03 0.03 0.06 for dirs 5 6 ------------------------------------------> piezo5.3
+	
+	Si
+	[ ] Double check QE5.3 for -0.06 -0.03 0.03 0.06 for dirs 4
+	[ ] Double check QE6.0 for -0.06 -0.03 0.03 0.06 for dirs 4
+
+	ZnO
+	[ ] Figure out why ZnO doesn't work
+	[ ] ZnO verify
+
+[ ] Stress-Strain
+	[ ] Try out high k-point grids
+
+
+
+
+WOOH TIME TO UPDATE SCRIPT WORKFLOW: no overwriting of finished files taking berry into account, berry-only gen, smart, pos_curr
+
+atomic_species
+
+	BaNiO3 (not with conv standard params but with vcrel print)
+	[ ] Piezo 5.3
+	[X] Piezo 5.4*
+	[ ] Piezo 6.0
+	[ ] Archive/Piezo 5.3_2
+	[ ] Cutoff 5.3
+	[X] Berry-kpt
+	[ ] Berry-kpt-vast
+	[ ] Stress-kpt
+
+	[ ] Si/Test
+
+	VFeSb
+	[ ] Piezo
+	[X] Test
+
+	[X] YOF_c
+	[X] LaOF
+
+	[X] Nb2OF
+	[X] SbOF
+
+	[X] W(OF)2
+	[X] W(ClO)2
+	[X] W(BrO)2
+
+	[ ] YOF_t
+	[ ] YOF_r
+
+	[ ] InN
+	[ ] GaN
+	[ ] AlN
+	[ ] ZnO
+
+	low priority: [std] PrOF [std] NdOF [std] SmOF [std] TaRhO4 [std] NbRhO4 [std] VRhO4 [std] Li4MoO5 [std] Li4WO5 [std] Rb2SnO3 [std] Rb2ZrO3 [phase_plot] Si/Piezo 5.3\6.0 [bg] Si/SBatch2/Piezo6.0SBatch; [path] ZnO/ Piezo\Plot 5.3\6.0
+
+
+
+
+
+
+Elastic stiffness constant (in GPa) comparison for +/-1% (-0.01 -0.005 0.00 0.005 0.01) and +/-6% (-0.06 -0.003 0.00 0.003 0.06)
+
+BaNiO3		Experimental      Materials Project  v5.3 (+/-1%)   v6.0 (+/-1%)   v5.3 (+/-6%)	   v6.0 (+/-6%)
+--------------------------------------------------------------------------------------------------------------------
+C_11		    n/a			158		153		154		-		-
+C_12		    n/a		 	 63		 59		 59		-		-
+C_13		    n/a		 	 29		 35		 35		-		-
+C_33		    n/a			208		233		236		-		-
+C_44		    n/a		  	  4		  3		  1	     in progress	3 (2.697)
+
+Si		Experimental      Materials Project  v5.3 (+/-1%)  v6.0 (+/-1%)   v5.3 (+/-6%)	   v6.0 (+/-6%)
+--------------------------------------------------------------------------------------------------------------------
+C_11		165.6-168.0		144		152		152		-		-
+C_12		  63.9-66.0		 53		 55		 55		-		-
+C_44		  79.5-84.0		 75		 74		 74		?		?
+
+
+
+Nonlinear stress-strain
+> try to fit to cubic/quintic and take the linear coefficient, use a chi^2 test -> equivalent to doing a Taylor series expansion about 0
+> double check large strain for axial and check if stress vs strain is concave down
+> look for references why
+
+
+QE v6.0 from -6% to +6% in steps of 1%:
+-----------------------------------------
+
+Cubic fit coefficients: [  4.13495804e+02  -1.99099900e-01   1.50608489e+00   4.25886014e-04]
+Chi-square for cubic fit: (-4.4043768018484962e-05, 1.0)
+C[4][4]: 1.50608488511
+
+Quintic fit coefficients: [ -1.08816770e+05   8.58607569e+01   9.03171271e+02  -5.02065714e-01	1.08511944e+00   5.49525504e-04]
+Chi-square for quintic fit: (0.00047710353850824314, 1.0)
+C[4][4]: 1.08511943634
+
+Plot fit and x
+Plot residual and x
+
+
+Null Hypothesis: The fitting curve should not differ significantly from the data gathered.
+
+chi_crit = 19.68 for 11 degrees of freedom at 5% confidence
+
+chi_calc < chi_crit
+
+The difference between the fitting curve and the data set is not significant.
+
+
+QE v6.0 from -1% to +1% in steps of 0.1%:
+-----------------------------------------
+Linear fit coefficients: [  1.31267464e+00   1.89143095e-04]
+Chi-square for linear fit: (-0.00082645405494881038, 1.0)
+C[4][4]: 1.31267464286
+
+stress 4 - strain 4: $ y\ =\ 1.3126746429x + 0.0001891431$
+$ R^2\ =\ 0.9661861572$
+
+
+k-point grid automation
+-----------------------
+a == b == c	cubic, rhombohedral -> 10
+	kpt1 from 1 to 10
+		kpt2 = kpt1
+			kpt3 = kpt1
+
+a == b != c	tetrahedral, hexagonal -> 100
+	kpt1 from 1 to 10
+		kpt2 = kpt1
+			kpt3 from 1 to 10
+
+a != b != c	orthorhombic, monoclinic, triclinic -> 3375
+	kpt1 from 1 to 15
+		kpt2 from 1 to 15
+			kpt3 from 1 to 15
+
+basic: 
+
+kpt1 kpt2 kpt3
+
+monoclinic
+
+
+[lost] Plot fit vs x
+[lost] Plot residual vs x
+[X] Run on Yoda using QE from my account
+[X] Run example file for BP
+
+   Version     Total Energy (Ry)	    Polarization (C/m^2)
+------------------------------------------------------------------------
+ Example File	-333.73911247 [v4.1a]	0.0409070 (mod 2.1051744) [v4.0]
+     5.3	-333.72163731		0.0409477 (mod 2.1051744)
+     5.4	-333.72163731		0.0409477 (mod 2.1051744)
+     6.0	-333.72163731		0.0409402 (mod 2.1051744)
+
+[X] Check BP code
+
+Berry Phase
+-----------
+
+bp_c_phase.f90 => DIFFERENT FOR 5.3, 5.4, and 6.0!
+
+5.3	
+   USE cell_base,            ONLY : at, alat, tpiba, omega, tpiba2
+   USE klist,                ONLY : nelec, degauss, nks, xk, wk
+   USE wvfct,                ONLY : npwx, npw, nbnd, ecutwfc, wg
+5.4	
+   USE cell_base,            ONLY : at, alat, tpiba, omega
+   USE klist,                ONLY : nelec, degauss, nks, xk, wk, igk_k, ngk
+   USE wvfct,                ONLY : npwx, nbnd, wg
+6.0	
+   USE cell_base,            ONLY : at, alat, tpiba, omega
+   USE klist,                ONLY : nelec, degauss, nks, xk, wk, igk_k, ngk
+   USE wvfct,                ONLY : npwx, nbnd, wg
+   USE qexsd_module,         ONLY : qexsd_init_berryPhaseOutput, qexsd_bp_obj
+
+5.3
+   REAL(DP) :: g2kin_bp(npwx)
+5.4 and 6.0
+
+
+5.3
+               CALL gk_sort(xk(1,kpoint-1),ngm,g,ecutwfc/tpiba2, &
+                            npw0,igk0,g2kin_bp) 
+5.4 and 6.0
+               npw0 = ngk(kpoint-1)
+               igk0(:) = igk_k(:,kpoint-1)
+
+5.3
+                  CALL gk_sort(xk(1,kpoint),ngm,g,ecutwfc/tpiba2, &
+                               npw1,igk1,g2kin_bp)  
+5.4 and 6.0
+                  npw1 = ngk(kpoint)
+                  igk1(:) = igk_k(:,kpoint)
+
+5.3
+                  CALL gk_sort(xk(1,kstart),ngm,g,ecutwfc/tpiba2, &
+                               npw1,igk1,g2kin_bp)  
+5.4 and 6.0
+                 npw1 = ngk(kstart)
+                  igk1(:) = igk_k(:,kstart)
+     
+
+5.3 and 5.4
+6.0
+!------------------------------------------------------------------------------
+!                            INITIALIZE  QEXSD OUTPUT ELEMENT
+! Here we write all output information in a berry_phase_type variable to print
+! them in the XML output  P.D. april 2016
+!------------------------------------------------------------------------------
+  CALL qexsd_init_berryPhaseOutput(qexsd_bp_obj, gpar, gvec, nppstr, nkort, xk, pdl_ion, mod_ion,  &
+                                  pdl_ion_tot, mod_ion_tot, nstring, pdl_elec , mod_elec, wstring, &
+                                  pdl_elec_up, mod_elec_up, pdl_elec_dw, mod_elec_dw, pdl_elec_tot,&
+                                  mod_elec_tot, pdl_tot, mod_tot, upol, rmod)
+
+
+	[ ] c_phase_field.f90
+	[ ] bp_calc_btq.f90
+     	[ ] bp_qvan3.f90 
+     	[ ] bp_strings.f90  
+     	[ ] electrons.f90
+     	[ ] input.f90 
+     	[ ] pwcom.f90 
+     	[ ] setup.f90         
+
+USE
+	[ ] kinds.mod
+	[ ] io_global.f90
+	[ ] buffers
+
+Removed:
+	[ ] bp_ylm_q.f
+	[ ] bp_dbess.f
+	[ ] bp_radin.f
+	[ ] bp_bess.f     
+
+
+
+Script:
+
+Constant cut-off
+Constant strain-dir: 3
+
+
+Loop across versions 5.3 5.4 6.0
+	Loop across kpt 1 to 19
+		VC Relax									(banio3.5.3.kpt1.vcrelax.out)
+		Loop across strain -0.01 -0.007 -0.005 -0.003 0.00 0.003 0.005 0.007 0.01
+			Relax 									(banio3.5.3.kpt1.-0.01.relax.out)
+			SCF 									(banio3.5.3.kpt1.-0.01.scf.out)
+			Loop across kptbig kpt+1 to 20
+				Loop across polar dirs 1 2 3
+					Berry 							(banio3.5.3.kpt1.-0.01.kpt2.berry-1.out)
+		Plot across strain for each kptbig >> need to figure this out!
+
+
+plot per
+
+
+[X] !! Try using the optimized density of one strain value as input for the next strain !! -> Not sure how to carry over density
+	[X] Try using prev atomic positions -> Faster for long relax (becomes no greater than ~5h15m)
+
+
+
+[ ] Pick a material
+[ ] Benchmark GPU (during the break!)
+[ ] Automate superscripts :o
+	[ ] Remake chi-test plot
+	[ ] Make arrays larger
+	[ ] Create the super loop
+[ ] Polarization vs stress
+	[ ] Create python script
+[ ] Polarization vs strain
+
+	v5.3 from -1% to +1%
+	--------------------
+	Strain Along	Delta P_x		Delta P_y		Delta P_z
+	x		linear, ~0 slope	~0 slope, about 0	all 0
+	y		linear, ~0 slope	~0 slope, about 0	all 0 then*
+	z		~0 slope, about 0	~0 slope, about 0	split linear, -offset
+	yz		~linear, ~0 slope	~linear, ~0 slope	change about offset*
+	xz		~0 slope, about 0	~0 slope, about 0	~0 slope, offset
+	xy		~linear, ~0 slope	~linear, ~0 slope	~0 slope, offset
+
+	v5.3 strain along y from +0.6% to +1% for polarization along z: ~0 slope, offset
+
+	v5.3 strain along z from -1% to -0.4% for polarization along z: linear with slope of -0.19
+
+	v5.3 strain along z from -0.5% to +1% for polarization along z: linear with slope of -0.27
+
+
+	v5.3_2 from -1% to +1%
+	----------------------
+	GOT DIFFERENT C_44 COMPARED TO FIRST CALC WITH VERSION 5.3
+	Strain Along	Delta P_x		Delta P_y		Delta P_z
+	x				
+	y				
+	z				
+	yz				
+	xz				
+	xy				
+
+
+	v5.4 from -1% to +1%
+	--------------------
+	Initial findings: different from 5.3 and 6.0 @-)
+	Strain Along	Delta P_x		Delta P_y		Delta P_z
+	x				
+	y				
+	z				
+	yz				
+	xz				
+	xy				
+
+
+	v6.0 from -1% to +1%
+	--------------------
+	Strain Along	Delta P_x		Delta P_y		Delta P_z
+	x		~0 slope, about 0	~0 slope, about 0	~0 slope, about 0 and offset
+	y		~0 slope, about 0	~0 slope, about 0	~0 slope, about 0 +offset and -offset
+	z		~0 slope, about 0	~0 slope, about 0	~0 slope, about 0 +offset and -offset
+	yz		~0 slope, about 0	~0 slope, about 0	~0 slope, about 0 +offset and -offset
+	xz		~0 slope, about 0	~0 slope, about 0	~0 slope, about 0 +offset and -offset
+	xy		~0 slope, about 0	~0 slope, about 0	~0 slope, about 0 +offset and -offset
+
+[ ] Find out if there is a precision limitation
+	[ ] Check Berry Phase for a plot showing large change and small changes
+		[ ] 5.3
+			[ ] x	steps +/- 1e-05
+			[ ] y	0 and -0.15 (0.006 to 0.01)
+			[ ] z	slope about -0.15 (-0.01 to -0.004, -0.003 to 0.1)
+			[ ] yz	all about -0.15
+			[ ] zx	all about -0.15
+			[ ] xy	all about -0.15
+		[ ] 5.4
+			[ ] x	about +2.0
+			[ ] y	about +2.0
+			[ ] z	steps +/- 2.0
+			[ ] yz	steps +/- 2.0
+			[ ] zx	about -2.0
+			[ ] xy	about +2.0
+		[ ] 6.0
+			[ ] x	about -2.0
+			[ ] y	steps +/- 2.0
+			[ ] z	steps +/- 2.0
+			[ ] yz	steps +/- 2.0
+			[ ] zx	steps +/- 2.0
+			[ ] xy	steps +/- 2.0
+
+[ ] Plot separate for weird
+	[ ] 5.3, Dir 1-6
+	[ ] 5.3_2, Dir 1-6
+	[ ] 5.4, Dir 1-6
+	[ ] 6.0, Dir 1-6
+[ ] Plot Berry Phase (not Polarization)
+	[ ] 6.0
+	[ ] 5.3-1
+	[ ] 5.3-2
+	[ ] 5.4
+[ ] Check variation on C_44
+	[X] Revan		C_44 = 1.16 GPa
+	[X] Yoda		C_44 = 1.16 GPa
+	[X] Sabel		C_44 = 1.16 GPa
+	[X] Sabel-Serial	C_44 = 1.08 GPa
+	[X] Aragorn		C_44 = 1.31 GPa
+	[X] Doris		C_44 = 1.16 GPa
+	[X] Sabel old script	C_44 = 1.16 GPa
+	[ ] Sabel old init pos	C_44 = ?.?? GPa
+
+	PROSPECTS SUMMARY
+===========================================
+() Successful both:	YOF, LaOF
+() Successful elastic:	InN, AlN
+() Test:		BaNiO3, Si, VFeSb
+
+() PAW not available:	AcOF
+() VC Relax STOP 2:	PrOF, NdOF, SmOF
+() VC Relax STOP 3:	GaN, ZnO
+() VC Relax 6h+:	NbO2F, WOF2 (Yoda), 
+
+
+PROSPECTIVE (Batch 1)
+Cubic [F-43m] {rare-earth oxyfluoride} (?magnetic, !stable):  PrOF, NdOF, SmOF
+Tetragonal [I41md] {5B-Rh oxide} (nonmagnetic, not stable): TaRhO4, NbRhO4, VRhO4 (known, +U)
+Tetragonal [I4] {6B-Li oxide} (nonmagnetic, not stable): Li4MoO5, Li4WO5
+Orthorhombic [Cmc21] {2+-Rb oxide}: (nonmagnetic and stable): Rb2SnO3, Rb2ZrO3, magnetic (Rb2PbO3, Rb2CoO3)
+
+PROSPECTIVE (Batch 2)
+Cubic [F-43m]: YOF, LaOF
+Orthorhombic [mm2]: NbO2F (Amm2), SbOF (Pna21)
+Orthorhombic [Pmc21]: W(OF)2, W(ClO)2 {known}, W(BrO)2
+
+PROSPECTIVE (Batch 3)
+Have known elastic and piezoelectric
+	198: SiRu, FeSi, SiOs, SiRh
+
+No piezo yet
+	198: NaBrO3, AgClO3
+
+No elastic and piezo yet
+	197: Ba2(IrO3)3, Bi2O3
+	198: GaPt, LiVF3, LiSbO3, SnWO4, GeWO4
+
+No band structure and piezo yet
+	198: NiAsS
+
+No band structure, elastic and piezo yet
+	198: GeRh, GeRu, EuGePt
+
+111: Cu2WS4, Li2WS4 (b), Cu2WSe4 (bep) -> very low p
+112: AlCuCl4, AlBiSe4 (bep)
+113: NbBrO3 (p), NbClO3 (ep)  -> heavy
+
+113: YAgTe2, TbAgTe2 (e), DyAgTe2 (e), HoAgTe2 (e), ErAgTe2 (e) -> rare earth
+122: AlAgTe2, GaAgTe2, InAgTe2 (ep)
+
+mm2: SeOF2 (p), NbO2F
+222: AgO2F (ep), IO2F (ep), AuO2F (ep)
+
+-4: VBO4, BAsO4, AlAsO4, InPS4 (e)
+-4: CdGaSe22 (e), CdGaTe22 (e), ZnGaTe22, ZnGaSe22, 
+
+Search for tetragonal test
+[X] 4mm
+[X] 4
+
+
+Non-magnetic and stable
+Orthorhombic: Cs2CeO3, NaBiS2, Na6PbO5, CdSeO4, SbOF
+
+Non-magnetic and not stable
+Tetragonal: La2MoO6, LiAgF2, Na6PbO5
+Orthorhombic: W(OF)2, SeO2, W(BrO)2, Hg2TeO3, PbO, TaGaO4, DyHO2, YHO2, CdSeO4, HoHO2, SnO, Pb2O3, SbOF, 
+GePb3O5, V2MoO8, Ge2N2O, SmTaO4, NaCuO2, TmTaO4, TaAsO4, K3ClO, NbO2F, CrO3 (2), TlF, TmBO3, ErBO3, DyBO3, SmBO3, YBO3, HoBO3, PbF2, Cs3Li2F5, BN, Li2VOF5, CsHO, SiO2
+
+Unknown magnetic ordering but zero final magnetic moment:
+Cubic:		AcOF, GeRh, TbInCu4, ThNiSn, DyCu5, BN, Na3(GePt)4, Na3SbSe4
+Tetragonal: 	Li2CaSiO4, Li2CaGeO4, VAg3O4, VCu3O4, CaGeN2, MgSiN2
+Orthorhombic:	HgSeO4, CSIO3, InHO2, CdSO4, CrHO2, GaHO2, Mg2PN3, BaZnF4, Li2GeO3, BaMgF4, B2O3, SnS, PbS, SrS3, Tl3VO4, Li2HN, HBr, 
+
+Unlikely
+H2O (tetragonal), HF (orthorhombic)
+
+
+==================================================================================================
+					Si
+==================================================================================================
+
+Relaxed properties (lattice constants in Ang, rho in g/cm^3)
+
+	Materials Project	v5.3		v5.4		v6.0		v6.0-smart	Expt
+----------------------------------------------------------------------------------------------------------
+a0	     ~5.4688		5.4751		not yet		5.4746		  not yet		
+rho	      2.28		2.2733		not yet		2.2739		  not yet
+
+Elastic stiffness constants in GPa (*unitless)
+
+	Materials Project	v5.3		v5.4		v6.0		v6.0-smart	Expt
+----------------------------------------------------------------------------------------------------------
+C_11	      144		151.1		not yet		151.2		not yet      165.6-168.0
+C_12	       53		 54.6		not yet		 54.7		not yet       63.9-66.0
+C_44	       75		 74.3		not yet		 74.3		not yet       79.5-84.0
+s_11	       8.7		  8.2		not yet		  8.2		not yet
+s_12	      -2.3		 -2.2		not yet		 -2.2		not yet
+s_44	      13.4		 13.5		not yet		 13.5		not yet
+K_V	       83		  87		not yet		  87		not yet
+K_R	       83		  87		not yet		  87		not yet
+G_V	       63		  64		not yet		  64		not yet
+G_R	       59		  61		not yet		  61		not yet
+K_{VRH}	       83		  87		not yet		  87		not yet
+G_{VRH}	       61		  62		not yet		  63		not yet
+A^U*	       0.30		  0.23		not yet		  0.23		not yet
+mu*	       0.20		  0.21		not yet		  0.21		not yet
+
+
+==================================================================================================
+					VFeSb
+==================================================================================================
+
+Relaxed properties (lattice constants in Ang, rho in g/cm^3)
+
+	Materials Project	v5.3		v5.4		v6.0		v6.0-smart	Expt
+----------------------------------------------------------------------------------------------------------
+a0	     ~5.7898		5.7988		5.7985		5.7976		  not yet		
+rho	      7.82		7.7852		7.7864		7.7902		  not yet
+
+Elastic stiffness constants in GPa (*unitless)
+
+	Materials Project	v5.3		v5.4		v6.0		v6.0-smart	Expt
+----------------------------------------------------------------------------------------------------------
+C_11	      281		281.6		281.8		282.3		not yet
+C_12	      100		 99.5		 99.6		 99.9		not yet
+C_44	       48		 47.0		 47.5		 47.6		not yet
+s_11	       4.4		  4.4		  4.4		  4.3		not yet
+s_12	      -1.2		 -1.1		 -1.1		 -1.1		not yet
+s_44	      20.8		 21.3		 21.1		 21.0		not yet
+K_V	      160		 160		 160		 161		not yet
+K_R	      160		 160		 160		 161		not yet
+G_V	       65		  65		  65		  65		not yet
+G_R	       59		  58		  59		  59		not yet
+K_{VRH}	      160		 160	 	 160		 161		not yet
+G_{VRH}	       62		  61		  62		  62		not yet
+A^U*	       0.49		  0.55		  0.53		  0.53		not yet
+mu*	       0.33		  0.33		  0.33		  0.33		not yet
+
+Piezoelectric properties in C/m^2
+
+	Materials Project	v5.3		v5.4		v6.0		v6.0-smart	v6.0-s-Van*
+-----------------------------------------------------------------------------------------------------------
+e_11	      0.00000		0.08488		0.08493		0.08492		 0.08491	 0.08485
+e_31	      0.00000	       -0.05966	       -0.05970	       -0.05968		-0.05970	-0.05682
+e_14	     -3.68181	       -3.63482	       -3.55754	       -3.55203		-3.54549	-3.54815
+
+*Based on methodology of Vanderbilt, 1999
+
+==================================================================================================
+					YOF (cubic)
+==================================================================================================
+
+Relaxed properties (lattice constants in Ang, rho in g/cm^3)
+
+	Materials Project	v5.4	      v5.4-smart	v6.0		v6.0-smart	Expt
+----------------------------------------------------------------------------------------------------------
+a0	     ~5.4405		not yet		not yet		not yet		  5.4165		
+rho	      5.11		not yet		not yet		not yet		  5.1788	
+
+Elastic properties in GPa (*unitless)
+
+	Materials Project	v5.4	      v5.4-smart	v6.0		v6.0-smart	Expt
+----------------------------------------------------------------------------------------------------------
+C_11	      not yet		not yet		not yet		not yet		  280.6
+C_12	      not yet		not yet		not yet		not yet		   71.7
+C_44	      not yet		not yet		not yet		not yet		   47.9
+s_11	      not yet		not yet		not yet		not yet		    4.0
+s_12	      not yet		not yet		not yet		not yet		   -0.8
+s_44	      not yet		not yet		not yet		not yet		   20.9
+K_V	      not yet		not yet		not yet		not yet		   141
+K_R	      not yet		not yet		not yet		not yet		   141
+G_V	      not yet		not yet		not yet		not yet		    71
+G_R	      not yet		not yet		not yet		not yet		    61
+K_{VRH}	      not yet		not yet		not yet		not yet		   141
+G_{VRH}	      not yet		not yet		not yet		not yet		    66
+A^U*	      not yet		not yet		not yet		not yet		    0.77
+mu*	      not yet		not yet		not yet		not yet		    0.30
+
+Piezoelectric properties in C/m^2
+
+	Materials Project	v5.4	      v5.4-smart	v6.0		v6.0-smart	v6.0-s-Van*
+-----------------------------------------------------------------------------------------------------------
+e_14	     -0.89716		not yet		not yet		not yet		 -0.90009	-0.90074
+
+*Based on methodology of Vanderbilt, 1999
+
+==================================================================================================
+					YOF (tetragonal)
+==================================================================================================
+
+Relaxed properties (lattice constants in Ang, rho in g/cm^3)
+
+	Materials Project	v5.4	      v5.4-smart	v6.0		v6.0-smart	Expt
+----------------------------------------------------------------------------------------------------------
+a0	      3.876		not yet		not yet		not yet		  3.8575
+c0	      5.520		not yet		not yet		not yet		  5.4970
+rho	      4.96		not yet		not yet		not yet		  5.0307
+
+Elastic properties in GPa (*unitless)
+
+	Materials Project	v5.4	      v5.4-smart	v6.0		v6.0-smart	Expt
+-----------------------------------------------------------------------------------------------------------
+C_11	      not yet		not yet		not yet		not yet		  186.7
+C_12	      not yet		not yet		not yet		not yet		  137.5
+C_13	      not yet		not yet		not yet		not yet		   55.0
+C_33	      not yet		not yet		not yet		not yet		  237.5
+C_44	      not yet		not yet		not yet		not yet		   31.1
+C_66	      not yet		not yet		not yet		not yet		  110.6
+s_11	      not yet		not yet		not yet		not yet		   11.8
+s_12	      not yet		not yet		not yet		not yet		   -8.5
+s_13	      not yet		not yet		not yet		not yet		   -0.8
+s_33	      not yet		not yet		not yet		not yet		    4.6
+s_44	      not yet		not yet		not yet		not yet		   32.2
+s_66	      not yet		not yet		not yet		not yet		    9.0
+K_V	      not yet		not yet		not yet		not yet		   123
+K_R	      not yet		not yet		not yet		not yet		   123
+G_V	      not yet		not yet		not yet		not yet		    43
+G_R	      not yet		not yet		not yet		not yet		    34
+K_{VRH}	      not yet		not yet		not yet		not yet		   123
+G_{VRH}	      not yet		not yet		not yet		not yet		    38
+A^U*	      not yet		not yet		not yet		not yet		    1.33
+mu*	      not yet		not yet		not yet		not yet		    0.36
+
+
+==================================================================================================
+					YOF (rhombohedral but has hexagonal unit cell)
+==================================================================================================
+
+Relaxed properties (lattice constants in Ang, rho in g/cm^3)
+
+	Materials Project	v5.4	      v5.4-smart	v6.0		v6.0-smart	Expt
+----------------------------------------------------------------------------------------------------------
+a0	      3.876		not yet		not yet		not yet		  3.8174
+c0	      5.520		not yet		not yet		not yet		 19.0971
+rho	      4.96		not yet		not yet		not yet		  5.1222
+
+Elastic properties in GPa (*unitless)
+
+	Materials Project	v5.4	      v5.4-smart	v6.0		v6.0-smart	Expt
+-----------------------------------------------------------------------------------------------------------
+C_11	      not yet		not yet		not yet		not yet		  219.8
+C_12	      not yet		not yet		not yet		not yet		   93.2
+C_13	      not yet		not yet		not yet		not yet		   92.1
+C_14	      not yet		not yet		not yet		not yet		   24.9
+C_33	      not yet		not yet		not yet		not yet		  181.2
+C_44	      not yet		not yet		not yet		not yet		   78.7
+C_66	      not yet		not yet		not yet		not yet		   63.4
+s_11	      not yet		not yet		not yet		not yet		   11.8
+s_12	      not yet		not yet		not yet		not yet		   -8.5
+s_13	      not yet		not yet		not yet		not yet		   -0.8
+s_14	      not yet		not yet		not yet		not yet		   -2.9		
+s_33	      not yet		not yet		not yet		not yet		    4.6
+s_44	      not yet		not yet		not yet		not yet		   32.2
+s_66	      not yet		not yet		not yet		not yet		   18.0
+K_V	      not yet		not yet		not yet		not yet		   123
+K_R	      not yet		not yet		not yet		not yet		   123
+G_V	      not yet		not yet		not yet		not yet		    43
+G_R	      not yet		not yet		not yet		not yet		    34
+K_{VRH}	      not yet		not yet		not yet		not yet		   123
+G_{VRH}	      not yet		not yet		not yet		not yet		    38
+A^U*	      not yet		not yet		not yet		not yet		    1.33
+mu*	      not yet		not yet		not yet		not yet		    0.36
+
+
+==================================================================================================
+					LaOF (final magnetic moment 0.001 \muB)
+==================================================================================================
+
+Relaxed properties (lattice constants in Ang, rho in g/cm^3)
+
+	Materials Project	v5.4	      v5.4-smart	v6.0		v6.0-smart	Expt
+----------------------------------------------------------------------------------------------------------
+a0	     ~5.7671		not yet		not yet		not yet		  5.7811		
+rho	      6.02		not yet		not yet		not yet		  5.9785
+
+Elastic properties in GPa (*unitless)
+
+	Materials Project	v5.4	      v5.4-smart	v6.0		v6.0-smart	Expt
+-----------------------------------------------------------------------------------------------------------
+C_11	      not yet		not yet		not yet		not yet		  207.2
+C_12	      not yet		not yet		not yet		not yet		   74.4
+C_44	      not yet		not yet		not yet		not yet		   37.3
+s_11	      not yet		not yet		not yet		not yet		    6.0
+s_12	      not yet		not yet		not yet		not yet		   -1.6
+s_44	      not yet		not yet		not yet		not yet		   26.8
+K_V	      not yet		not yet		not yet		not yet		    119
+K_R	      not yet		not yet		not yet		not yet		    119
+G_V	      not yet		not yet		not yet		not yet		     49
+G_R	      not yet		not yet		not yet		not yet		     45
+K_{VRH}	      not yet		not yet		not yet		not yet		    119
+G_{VRH}	      not yet		not yet		not yet		not yet		     47
+A^U*	      not yet		not yet		not yet		not yet		   0.41
+mu*	      not yet		not yet		not yet		not yet		   0.32
+
+
+Piezoelectric properties in C/m^2
+
+	Materials Project	v5.4	      v5.4-smart	v6.0		v6.0-smart	v6.0-s-Van*
+-----------------------------------------------------------------------------------------------------------
+e_14	     -1.30365		not yet		not yet		not yet		 -1.27177	 -1.27261	 	
+
+
+============================================================================================================
+					 ZnO
+============================================================================================================
+
+Relaxed properties (lattice constants in Ang, rho in g/cm^3)
+
+	Materials Project	v5.4	      v5.4-smart	v6.0		v6.0-smart***	Expt
+----------------------------------------------------------------------------------------------------------
+a0	      3.289		not yet		not yet		not yet		  not yet	3.2495**	
+c0	      5.307		not yet		not yet		not yet		  not yet	5.207**
+rho	      5.44		not yet		not yet		not yet		  not yet	5.675**
+
+** Foundations of Nanomechanics: From Solid-State Theory to Device Applications
+*** Variable-cell relaxation did not converge well (STOP 3)
+
+
+Elastic properties in GPa
+
+	Materials Project	v5.4	      v5.4-smart	v6.0		v6.0-smart***	Expt
+----------------------------------------------------------------------------------------------------------
+C_11	      188		not yet		not yet		not yet		  not yet	209**
+C_12	      109		not yet		not yet		not yet		  not yet	120**
+C_13	       92		not yet		not yet		not yet		  not yet	104**
+C_33	      205		not yet		not yet		not yet		  not yet	218**
+C_44	       37		not yet		not yet		not yet		  not yet	44.1**
+s_11	       8.7		not yet		not yet		not yet		  not yet
+s_12	      -4.1		not yet		not yet		not yet		  not yet
+s_13	      -2.1		not yet		not yet		not yet		  not yet
+s_33	       6.8		not yet		not yet		not yet		  not yet
+s_44	      27.1		not yet		not yet		not yet		  not yet
+K_V	      130		not yet		not yet		not yet		  not yet
+K_R	      130		not yet		not yet		not yet		  not yet
+G_V	       42		not yet		not yet		not yet		  not yet
+G_R	       41		not yet		not yet		not yet		  not yet
+K_{VRH}	      130		not yet		not yet		not yet		  not yet
+G_{VRH}	       41		not yet		not yet		not yet		  not yet
+A^U*	       0.13		not yet		not yet		not yet		  not yet
+mu*	       0.36		not yet		not yet		not yet		  not yet
+
+*  unitless
+** Foundations of Nanomechanics: From Solid-State Theory to Device Applications
+*** Variable-cell relaxation did not converge well (STOP 3)
+
+Piezoelectric properties in C/m^2
+
+	Materials Project	v5.4	      v5.4-smart	v6.0		v6.0-smart***	Expt
+-----------------------------------------------------------------------------------------------------------
+e_31	     -0.53751		not yet		not yet		not yet		 not yet	
+e_33	      1.03681		not yet		not yet		not yet		 not yet	
+e_15	     -0.38500		not yet		not yet		not yet		 not yet	
+
+*** Variable-cell relaxation did not converge well (STOP 3)
+
+
+==================================================================================
+				PbTiO3 (cubic)
+==================================================================================
+
+Relaxed properties (lattice constants in Ang, rho in g/cm^3)
+
+	Materials Project	v5.4-smart	v6.0-smart	Expt
+-------------------------------------------------------------------------------
+a0	      3.969		not yet		  3.9694
+rho	      8.05		not yet		  8.046
+
+Elastic properties in GPa (*unitless)
+
+	Materials Project	v5.4-smart	v6.0-smart	Expt
+-------------------------------------------------------------------------------
+C_11	      281		not yet		  278.9
+C_12	      116		not yet		  117.4
+C_44	       97		not yet		   97.2
+s_11	       4.7		not yet		    4.8
+s_12	      -1.4		not yet		   -1.4
+s_44	      10.3		not yet		   10.3
+K_V	      171		not yet		  171
+K_R	      171		not yet		  171
+G_V	       91		not yet		   91
+G_R	       91		not yet		   90
+K_{VRH}	      171		not yet		  171
+G_{VRH}	       91		not yet		   90
+A^U*	       0.03		not yet		    0.04
+mu*	       0.27		not yet		    0.28
+
+
+==================================================================================
+				PbTiO3 (tetragonal)
+==================================================================================
+
+Relaxed properties (lattice constants in Ang, rho in g/cm^3)
+
+	Materials Project	v5.4-smart	v6.0-smart	Expt
+-------------------------------------------------------------------------------
+a0	      3.872		not yet		  3.8441
+c0	      4.585		not yet		  4.7565
+rho	      7.32		not yet		  7.1598
+
+Elastic properties in GPa (*unitless)
+
+	Materials Project	v5.4-smart	v6.0-smart	Expt
+-------------------------------------------------------------------------------
+C_11	      173		not yet		  171.1
+C_12	       79		not yet		   78.6
+C_13	       46		not yet		   44.7
+C_33	       44		not yet		   43.6
+C_44	       35		not yet		   34.3
+C_66	       87		not yet		   87.0
+s_11	       8.5		not yet		    8.6
+s_12	      -2.1		not yet		   -2.2
+s_13	      -6.7		not yet		   -6.5
+s_33	      37.0		not yet		   36.3
+s_44	      28.4		not yet		   29.1
+s_66	      11.5		not yet		   11.5
+K_V	       81		not yet		   80.2
+K_R	       44		not yet		   43.6
+G_V	       46		not yet		   45.6
+G_R	       31		not yet		   31.0
+K_{VRH}	       63		not yet		   61.9
+G_{VRH}	       39		not yet		   38.3
+A^U*	       3.29		not yet		    3.20
+mu*	       0.24		not yet		    0.24
+
+Piezoelectric properties in C/m^2
+
+	Materials Project	v5.4-smart	v6.0-smart	v6.0-smart	
+-------------------------------------------------------------------------------
+e_31	      1.64365		not yet		 0.39860	
+e_33	      2.79212		not yet	       -84.57344*	
+e_15	      3.25989		not yet		 2.81847	
+*R^2 = 0.488
+
+==================================================================================
+				KNbO3 (cubic)
+==================================================================================
+
+Relaxed properties (lattice constants in Ang, rho in g/cm^3)
+
+	Materials Project	v5.4-smart	v6.0-smart	Expt
+-------------------------------------------------------------------------------
+a0	      4.057		not yet		  4.0253
+rho	      4.47		not yet		  4.583
+
+Elastic properties in GPa (*unitless)
+
+	Materials Project	v5.4-smart	v6.0-smart	Expt
+-------------------------------------------------------------------------------
+C_11	      373		not yet		  380.2
+C_12	       69		not yet		   74.0
+C_44	       88		not yet		   93.6
+s_11	       2.8		not yet		    2.8
+s_12	      -0.4		not yet		   -0.5
+s_44	      11.3		not yet		   10.7
+K_V	      171		not yet		  176
+K_R	      171		not yet		  176
+G_V	      114		not yet		  117
+G_R	      106		not yet		  111
+K_{VRH}	      171		not yet		  176
+G_{VRH}	      110		not yet		  114
+A^U*	       0.36		not yet		    0.30
+mu*	       0.24		not yet		    0.23
+
+
+==================================================================================
+				KNbO3 (tetragonal)
+==================================================================================
+
+Relaxed properties (lattice constants in Ang, rho in g/cm^3)
+
+	Materials Project	v5.4-smart	v6.0-smart	Expt
+-------------------------------------------------------------------------------
+a0	      4.029		not yet		  ?
+c0	      4.219		not yet		  ?
+rho	      4.37		not yet		  ?
+
+Elastic properties in GPa (*unitless)
+
+	Materials Project	v5.4-smart	v6.0-smart	Expt
+-------------------------------------------------------------------------------
+C_11	      321		not yet		  ?
+C_12	       83		not yet		  ?
+C_13	       68		not yet		  ?
+C_33	       82		not yet		  ?
+C_44	       64		not yet		  ?
+C_66	       86		not yet		  ?
+s_11	       3.8		not yet		  ?
+s_12	      -0.4		not yet		  ?
+s_13	      -2.8		not yet		  ?
+s_33	      16.9		not yet		  ?
+s_44	      15.6		not yet		  ?
+s_66	      11.6		not yet		  ?
+K_V	      129		not yet		  ?
+K_R	       80		not yet		  ?
+G_V	       77		not yet		  ?
+G_R	       60		not yet		  ?
+K_{VRH}	      105		not yet		  ?
+G_{VRH}	       68		not yet		  ?
+A^U*	       1.99		not yet		  ?
+mu*	       0.23		not yet		  ?
+
+Piezoelectric properties in C/m^2
+
+	Materials Project	v5.4-smart	v6.0-smart	Expt
+-------------------------------------------------------------------------------
+e_31	     -0.11636		not yet		 ?	
+e_33	      3.25783		not yet		 ?	
+e_15	      0.37878		not yet		 ?
+
+
+==================================================================================
+				KNbO3 (orthorhombic)
+==================================================================================
+
+Relaxed properties (lattice constants in Ang, rho in g/cm^3)
+
+	Materials Project	v5.4-smart	v6.0-smart	Expt
+-------------------------------------------------------------------------------
+a0	      4.018		not yet		  3.9825
+b0	      4.131		not yet		  5.7916
+c0	      4.131		not yet		  5.8266
+rho	      4.36		not yet		  4.4483
+
+Elastic properties in GPa (*unitless)
+
+	Materials Project	v5.4-smart	v6.0-smart	Expt
+-------------------------------------------------------------------------------
+C_11	      not yet		not yet		  317.5
+C_12	      not yet		not yet		   78.6
+C_13	      not yet		not yet		   79.0
+C_22	      not yet		not yet		  178.4
+C_23	      not yet		not yet		   12.9
+C_33	      not yet		not yet		  154.9
+C_44	      not yet		not yet		   12.6**
+C_55	      not yet		not yet		   73.6**
+C_66	      not yet		not yet		   85.1
+s_11	      not yet		not yet		    4.0
+s_12	      not yet		not yet		   -1.6
+s_13	      not yet		not yet		   -1.9
+s_22	      not yet		not yet		    6.3
+s_23	      not yet		not yet		    0.3
+s_33	      not yet		not yet		    7.4
+s_44	      not yet		not yet		   79.1**
+s_55	      not yet		not yet		   13.6**
+s_66	      not yet		not yet		   11.7
+K_V	      not yet		not yet		  110.2
+K_R	      not yet		not yet		   88.9
+G_V	      not yet		not yet		   66.3**
+G_R	      not yet		not yet		   37.7**
+K_{VRH}	      not yet		not yet		   99.5
+G_{VRH}	      not yet		not yet		   52.0**
+A^U*	      not yet		not yet		    4.02
+mu*	      not yet		not yet		    0.28
+
+**Instances of relaxation with STOP 3
+
+Piezoelectric properties in C/m^2
+
+	Materials Project	v5.4-smart	v6.0-smart	Expt
+-------------------------------------------------------------------------------
+e_31	      not yet 		not yet		 ?	
+e_32	      not yet		not yet		 ?
+e_33	      not yet		not yet		 ?
+e_24	      not yet		not yet		 ?
+e_15	      not yet		not yet		 ?	
+
+
+==================================================================================
+				KNbO3 (rhombohedral but hexagonal unit cell)
+==================================================================================
+
+Relaxed properties (lattice constants in Ang, rho in g/cm^3)
+
+	Materials Project	v5.4-smart	v6.0-smart	Expt
+-------------------------------------------------------------------------------
+a0	      4.060		not yet		  5.7363
+c0	      4.060		not yet		  7.0613
+rho	      4.37		not yet		  4.456
+
+Elastic properties in GPa (*unitless)
+
+	Materials Project	v5.4-smart	v6.0-smart	Expt
+-------------------------------------------------------------------------------
+C_11	      196		not yet		  195.3
+C_12	       73		not yet		   69.8
+C_13	       49		not yet		   42.9
+C_14	      -28		not yet		  -34.5
+C_33	      191		not yet		  192.9
+C_44	       32		not yet		    5.9
+C_66	       61		not yet		   62.8
+s_11	       8.9		not yet		   17.0
+s_12	      -4.8		not yet		  -13.0
+s_13	      -1.1		not yet		   -0.9
+s_14	      12.1		not yet		   40.0
+s_33	       5.8		not yet		    5.6
+s_44	      52.8		not yet		  145.3
+s_56	      12.1		not yet		   79.9
+s_66	      27.4		not yet		   59.9
+K_V	      103		not yet		   99
+K_R	      102		not yet		  101
+G_V	       52		not yet		   51
+G_R	       29		not yet		   12
+K_{VRH}	      103		not yet		  100
+G_{VRH}	       41		not yet		   32
+A^U*	       4.10		not yet		   16.75
+mu*	       0.33		not yet		    0.36
+
+Piezoelectric properties in C/m^2
+
+	Materials Project	v5.4-smart	v6.0-smart		v6.0-s-Van*		Expt
+--------------------------------------------------------------------------------------------------------
+e_11	      0.00000		not yet		 1.51958 (R^2=0.9997)	 0.76037 (R^2=0.9997)
+e_31	     -2.09002 		not yet	       -20.86522 (R^2=0.4668)  -20.29704 (R^2=0.4479)	
+e_22	     -2.70659		not yet		-2.60699 (R^2=0.9995)	-2.60868 (R^2=0.9997)
+e_33	     -2.93923		not yet	       -30.83288 (R^2=0.7147)  -30.85599 (R^2=0.7147)
+e_14	      0.00000		not yet		 2.48604 (R^2=0.9994)	 1.24391 (R^2=0.9994)
+e_24	     -4.64164		not yet		 4.30587 (R^2=0.9994)	 4.30912 (R^2=0.9994)	
+
+
+============================================================================================================
+					 LaN
+============================================================================================================
+
+Relaxed properties (lattice constants in Ang, rho in g/cm^3)
+
+	Materials Project	v5.4-smart	v6.0-smart	Expt
+----------------------------------------------------------------------------------------------------------
+a0	      4.133		not yet		  2.5527	
+c0	      5.960		not yet		  4.2213	
+rho	      5.76		not yet		  3.4598	
+
+Elastic properties in GPa
+
+	Materials Project	v5.4-smart	v6.0-smart	Expt
+----------------------------------------------------------------------------------------------------------
+C_11	      not yet		not yet		  126.9
+C_12	      not yet		not yet		   93.9
+C_13	      not yet		not yet		   76.9
+C_33	      not yet		not yet		   80.2
+C_44	      not yet		not yet		   36.1
+s_11	      not yet		not yet		   21.9
+s_12	      not yet		not yet		   -8.4
+s_13	      not yet		not yet		  -13.0
+s_33	      not yet		not yet		   37.4
+s_44	      not yet		not yet		   27.7
+K_V	      not yet		not yet		   92.1
+K_R	      not yet		not yet		   79.9
+G_V	      not yet		not yet		   23.5
+G_R	      not yet		not yet		   18.5
+K_{VRH}	      not yet		not yet		   86.0
+G_{VRH}	      not yet		not yet		   21.0
+A^U*	      not yet		not yet		    1.51
+mu*	      not yet		not yet		    0.39
+
+*  unitless
+
+
+Piezoelectric properties in C/m^2
+
+	Materials Project	v5.4-smart	v6.0-smart	v6.0-s-Van***
+-----------------------------------------------------------------------------------------------------------
+e_31	     -0.15431		not yet		  0.31674*	
+e_33	      1.78562		not yet		  1.72872	
+e_15	     -0.23529		not yet		 -0.10053**
+
+*R^2 = 0.973
+**R^2 = 0.918
+***Based on methodology of Vanderbilt, 1999
+
+c_tilde (C/m^2)
+[[-0.00067  0.       0.      -0.02902 -0.10078  0.     ]
+ [ 0.       0.       0.00013 -0.10078  0.       0.     ]
+ [-0.14777 -0.14777  1.72991 -0.00194  0.       0.     ]]
+
+
+
+============================================================================================================
+					 LiBr (vcrelax - Error in routine checkallsym (3): not orthogonal operation)
+============================================================================================================
+
+Relaxed properties (lattice constants in Ang, rho in g/cm^3)
+
+	Materials Project	v5.4-smart	v6.0-smart	Expt
+----------------------------------------------------------------------------------------------------------
+a0	      4.188		not yet		  4.1883	
+c0	      6.808		not yet		  6.8060	
+rho	      2.79		not yet		  2.7896	
+
+Elastic properties in GPa
+
+	Materials Project	v5.4-smart	v6.0-smart	Expt
+----------------------------------------------------------------------------------------------------------
+C_11	       30		not yet		   29.3
+C_12	       15		not yet		   14.9
+C_13	        9		not yet		   12.5
+C_33	       31		not yet		   31.2
+C_44	        7		not yet		    6.8
+s_11	      46.5		not yet		   49.3
+s_12	     -21.2		not yet		  -20.0
+s_13	     -7.7		not yet		  -11.8
+s_33	      36.8		not yet		   41.4
+s_44	      141		not yet		  146.3
+K_V	       18		not yet		   18.9
+K_R	       18		not yet		   18.9
+G_V	        8		not yet		    7.5
+G_R	        8		not yet		    7.4
+K_{VRH}	       18		not yet		   18.9
+G_{VRH}	        8		not yet		    7.5
+A^U*	       0.19		not yet		    0.07
+mu*	       0.30		not yet		    0.33
+
+*  unitless
+
+
+Piezoelectric properties in C/m^2
+
+	Materials Project	v5.4-smart	v6.0-smart	Expt
+-----------------------------------------------------------------------------------------------------------
+e_31	     -0.15431		not yet		  0.31674*	
+e_33	      1.78562		not yet		  1.72872	
+e_15	     -0.23529		not yet		 -0.10053**
+
+*R^2 = 0.973
+**R^2 = 0.918
+
+
+==================================================================================================
+					SiRu
+==================================================================================================
+
+Relaxed properties (lattice constants in Ang, rho in g/cm^3)
+
+	Materials Project     v5.4-smart	v6.0-smart**	Expt
+----------------------------------------------------------------------------------------------------------
+a0	      4.745		not yet		  not yet		
+rho	      8.03		not yet		  not yet
+
+**STOP 3 for relax	
+
+Elastic properties in GPa (*unitless)
+
+	Materials Project     v5.4-smart        v6.0-smart**	Expt
+----------------------------------------------------------------------------------------------------------
+C_11	      290		not yet		  not yet
+C_12	      162		not yet		  not yet
+C_44	      133		not yet		  not yet
+s_11	       5.7		not yet		  not yet
+s_12	      -2.0		not yet		  not yet
+s_44	       7.5		not yet		  not yet
+K_V	      204		not yet		  not yet
+K_R	      204		not yet		  not yet
+G_V	      106		not yet		  not yet
+G_R	       93		not yet		  not yet
+K_{VRH}	      204		not yet		  not yet
+G_{VRH}	       99		not yet		  not yet
+A^U*	       0.66		not yet		  not yet
+mu*	       0.29		not yet		  not yet
+
+**STOP 3 for relax
+
+Piezoelectric properties in C/m^2
+
+	Materials Project     v5.4-smart	v6.0-smart	v6.0-s-Van*
+-----------------------------------------------------------------------------------------------------------
+e_14	      1.30269		not yet		 1.35368**	0.67739***
+
+*Based on methodology of Vanderbilt, 1999
+**R^2 = 0.416, STOP 3 relax
+***bad fit, STOP 3 relax
+
+
+==================================================================================================
+					GaPt
+==================================================================================================
+
+Relaxed properties (lattice constants in Ang, rho in g/cm^3)
+
+	Materials Project     v5.4-smart	v6.0-smart	Expt
+----------------------------------------------------------------------------------------------------------
+a0	      4.977		not yet		  4.9697		
+rho	     14.27		not yet		 14.3298	
+
+Elastic properties in GPa (*unitless)
+
+	Materials Project     v5.4-smart      v6.0-smart	Expt
+----------------------------------------------------------------------------------------------------------
+C_11	      not yet		not yet		  243.4
+C_12	      not yet		not yet		  128.5
+C_44	      not yet		not yet		   43.4
+s_11	      not yet		not yet		    6.5
+s_12	      not yet		not yet		   -2.2
+s_44	      not yet		not yet		   23.0
+K_V	      not yet		not yet		  166.8
+K_R	      not yet		not yet		  166.8
+G_V	      not yet		not yet		   49.0
+G_R	      not yet		not yet		   48.1
+K_{VRH}	      not yet		not yet		  166.8
+G_{VRH}	      not yet		not yet		   48.6
+A^U*	      not yet		not yet		    0.09
+mu*	      not yet		not yet		    0.37
+
+Piezoelectric properties in C/m^2
+
+	Materials Project     v5.4-smart	v6.0-smart	v6.0-s-Van*
+-----------------------------------------------------------------------------------------------------------
+e_14	      not yet		not yet		42.70622**	42.73817***
+
+*Based on methodology of Vanderbilt, 1999
+**R^2 = 0.552
+***bad fit
+
+
+==================================================================================================
+					NaBrO3
+==================================================================================================
+
+Relaxed properties (lattice constants in Ang, rho in g/cm^3)
+
+	Materials Project     v5.4-smart	v6.0-smart	Expt
+----------------------------------------------------------------------------------------------------------
+a0	      6.820		not yet		 not yet		
+rho	      3.16		not yet		 not yet	
+
+Elastic properties in GPa (*unitless)
+
+	Materials Project     v5.4-smart      v6.0-smart	Expt
+----------------------------------------------------------------------------------------------------------
+C_11	       52		not yet		 not yet
+C_12	       15		not yet		 not yet
+C_44	       15		not yet		 not yet
+s_11	       22.3		not yet		 not yet
+s_12	       -5.0		not yet		 not yet
+s_44	       68.0		not yet		 not yet
+K_V	       27		not yet		 not yet
+K_R	       27		not yet		 not yet
+G_V	       16		not yet		 not yet
+G_R	       16		not yet		 not yet
+K_{VRH}	       27		not yet		 not yet
+G_{VRH}	       16		not yet		 not yet
+A^U*	        0.06		not yet		 not yet
+mu*	        0.25		not yet		 not yet
+
+Piezoelectric properties in C/m^2
+
+	Materials Project     v5.4-smart	v6.0-smart	v6.0-s-Van*
+-----------------------------------------------------------------------------------------------------------
+e_14	      not yet		not yet		not yet		not yet
+
+*Based on methodology of Vanderbilt, 1999
+
+
+==================================================================================================
+					NiAsS
+==================================================================================================
+
+Relaxed properties (lattice constants in Ang, rho in g/cm^3)
+
+	Materials Project     v5.4-smart	v6.0-smart	Expt
+----------------------------------------------------------------------------------------------------------
+a0	      5.696		not yet		 not yet		
+rho	      5.96		not yet		 not yet	
+
+Elastic properties in GPa (*unitless)
+
+	Materials Project     v5.4-smart      v6.0-smart	Expt
+----------------------------------------------------------------------------------------------------------
+C_11	      205		not yet		 not yet
+C_12	       61		not yet		 not yet
+C_44	       51		not yet		 not yet
+s_11	        5.7		not yet		 not yet
+s_12	       -1.3		not yet		 not yet
+s_44	       19.5		not yet		 not yet
+K_V	      109		not yet		 not yet
+K_R	      109		not yet		 not yet
+G_V	       59		not yet		 not yet
+G_R	       58		not yet		 not yet
+K_{VRH}	      109		not yet		 not yet
+G_{VRH}	       59		not yet		 not yet
+A^U*	        0.14		not yet		 not yet
+mu*	        0.27		not yet		 not yet
+
+Piezoelectric properties in C/m^2
+
+	Materials Project     v5.4-smart	v6.0-smart	v6.0-s-Van*
+-----------------------------------------------------------------------------------------------------------
+e_14	      not yet		not yet		not yet		not yet
+
+*Based on methodology of Vanderbilt, 1999
+
+
+==================================================================================================
+					GeRh
+==================================================================================================
+
+Relaxed properties (lattice constants in Ang, rho in g/cm^3)
+
+	Materials Project     v5.4-smart	v6.0-smart	Expt
+----------------------------------------------------------------------------------------------------------
+a0	      4.926		not yet		 not yet		
+rho	      9.76		not yet		 not yet	
+
+Elastic properties in GPa (*unitless)
+
+	Materials Project     v5.4-smart      v6.0-smart	Expt
+----------------------------------------------------------------------------------------------------------
+C_11	      not yet		not yet		 not yet
+C_12	      not yet		not yet		 not yet
+C_44	      not yet		not yet		 not yet
+s_11	      not yet		not yet		 not yet
+s_12	      not yet		not yet		 not yet
+s_44	      not yet		not yet		 not yet
+K_V	      not yet		not yet		 not yet
+K_R	      not yet		not yet		 not yet
+G_V	      not yet		not yet		 not yet
+G_R	      not yet		not yet		 not yet
+K_{VRH}	      not yet		not yet		 not yet
+G_{VRH}	      not yet		not yet		 not yet
+A^U*	      not yet		not yet		 not yet
+mu*	      not yet		not yet		 not yet
+
+Piezoelectric properties in C/m^2
+
+	Materials Project     v5.4-smart	v6.0-smart	v6.0-s-Van*
+-----------------------------------------------------------------------------------------------------------
+e_14	       1.06359		not yet		not yet		not yet
+
+*Based on methodology of Vanderbilt, 1999
+
+
+==================================================================================
+				AlAgTe2
+==================================================================================
+
+Relaxed properties (lattice constants in Ang, rho in g/cm^3)
+
+	Materials Project	v5.4-smart	v6.0-smart	Expt
+-------------------------------------------------------------------------------
+a0	      6.419		not yet		  ?
+c0	      7.620 (12.241)	not yet		  ?
+rho	      5.14		not yet		  ?
+
+Elastic properties in GPa (*unitless)
+
+	Materials Project	v5.4-smart	v6.0-smart	Expt
+-------------------------------------------------------------------------------
+C_11	       58		not yet		  ?
+C_12	       34		not yet		  ?
+C_13	       36		not yet		  ?
+C_33	       54		not yet		  ?
+C_44	       22		not yet		  ?
+C_66	       22		not yet		  ?
+s_11	       31.7		not yet		  ?
+s_12	      -9.9		not yet		  ?
+s_13	     -14.5		not yet		  ?
+s_33	      37.7		not yet		  ?
+s_44	      44.6		not yet		  ?
+s_66	      44.8		not yet		  ?
+K_V	      42		not yet		  ?
+K_R	      42		not yet		  ?
+G_V	      18		not yet		  ?
+G_R	      16		not yet		  ?
+K_{VRH}	      42		not yet		  ?
+G_{VRH}	      17		not yet		  ?
+A^U*	       0.70		not yet		  ?
+mu*	       0.33		not yet		  ?
+
+Piezoelectric properties in C/m^2
+
+	Materials Project     v5.4-smart	v6.0-smart	v6.0-s-Van*
+-------------------------------------------------------------------------------
+e_14	     -0.08423		not yet		 ?	
+e_36	      0.03934		not yet		 ?	
+
+*Based on methodology of Vanderbilt, 1999
+
+
+==================================================================================
+				InAgTe2
+==================================================================================
+
+Relaxed properties (lattice constants in Ang, rho in g/cm^3)
+
+	Materials Project	v5.4-smart	v6.0-smart	Expt
+-------------------------------------------------------------------------------
+a0	      6.591		not yet		  ?
+c0	      7.971 (12.932)	not yet		  ?
+rho	      5.65		not yet		  ?
+
+Elastic properties in GPa (*unitless)
+
+	Materials Project	v5.4-smart	v6.0-smart	Expt
+-------------------------------------------------------------------------------
+C_11	      not yet		not yet		  ?
+C_12	      not yet		not yet		  ?
+C_13	      not yet		not yet		  ?
+C_33	      not yet		not yet		  ?
+C_44	      not yet		not yet		  ?
+C_66	      not yet		not yet		  ?
+s_11	      not yet		not yet		  ?
+s_12	      not yet		not yet		  ?
+s_13	      not yet		not yet		  ?
+s_33	      not yet		not yet		  ?
+s_44	      not yet		not yet		  ?
+s_66	      not yet		not yet		  ?
+K_V	      not yet		not yet		  ?
+K_R	      not yet		not yet		  ?
+G_V	      not yet		not yet		  ?
+G_R	      not yet		not yet		  ?
+K_{VRH}	      not yet		not yet		  ?
+G_{VRH}	      not yet		not yet		  ?
+A^U*	      not yet		not yet		  ?
+mu*	      not yet		not yet		  ?
+
+Piezoelectric properties in C/m^2
+
+	Materials Project     v5.4-smart	v6.0-smart	v6.0-s-Van*
+-------------------------------------------------------------------------------
+e_14	     not yet		not yet		 ?	
+e_36	     not yet		not yet		 ?	
+
+*Based on methodology of Vanderbilt, 1999
+
+
+==================================================================================
+				WOF4
+==================================================================================
+
+Relaxed properties (lattice constants in Ang, rho in g/cm^3)
+
+	Materials Project	v5.4-smart	v6.0-smart	Expt
+-------------------------------------------------------------------------------
+a0	      3.930 (7.173)	not yet		  7.2456
+c0	      5.440 (3.930)	not yet		  3.9996
+rho	      4.53		not yet		  4.363
+
+Elastic properties in GPa (*unitless)
+
+	Materials Project	v5.4-smart	v6.0-smart	Expt
+-------------------------------------------------------------------------------
+C_11	      127		not yet		    4.1
+C_12	        4		not yet		    2.4
+C_13		4		not yet		    1.9
+C_16		0		not yet		   -0.5
+C_23	        5		not yet		    1.9
+C_33	        9		not yet		   70.7
+C_44	        5		not yet		    3.6
+C_66	        6		not yet		    3.0
+s_11	        8.0		not yet		  416.7
+s_12	       -2.3		not yet		 -261.2
+s_13	       -2.3		not yet		   -4.3
+s_16	        0.0		not yet		  115.4
+s_23	     -120.8		not yet		   -4.3
+s_33	      192.8		not yet		   14.4
+s_34	       16.8		not yet		    0.5
+s_44	      194.6		not yet		  279.1
+s_45		0.0		not yet		   -1.8
+s_66	      168.0		not yet		  371.9
+K_V	       19		not yet		   10
+K_R	        7		not yet		    3
+G_V	       12		not yet		    7
+G_R	        4		not yet		    2
+K_{VRH}	       13		not yet		    7
+G_{VRH}	        8		not yet		    4
+A^U*	       11.55		not yet		   13.77
+mu*	        0.24		not yet		    0.23
+
+Piezoelectric properties in C/m^2
+
+	Materials Project     v5.4-smart	v6.0-smart	v6.0-s-Van*
+-------------------------------------------------------------------------------
+e_31	      0.02850		not yet		  0.11295(0.996)  0.01196(0.739)
+e_33	     -2.89625		not yet		 -1.67404(0.999) -1.67519(0.999)
+e_14	      0.01086		not yet		  0.01902(0.973)  0.01902(0.975)
+e_24	     -0.00209		not yet		 -0.00309(0.992) -0.00299(0.993)
+
+*Based on methodology of Vanderbilt, 1999
+
+
+==================================================================================
+				NbNO
+==================================================================================
+
+Relaxed properties (lattice constants in Ang, rho in g/cm^3)
+
+	Materials Project	v5.4-smart	v6.0-smart	Expt
+-------------------------------------------------------------------------------
+a0	      3.969 (3.969)	not yet		  3.9316
+c0	      5.947 (10.485)	not yet		 10.3811
+rho	      4.94		not yet		  5.667
+
+Elastic properties in GPa (*unitless)
+
+	Materials Project	v5.4-smart	v6.0-smart	Expt
+-------------------------------------------------------------------------------
+C_11	      415		not yet		  414.4
+C_12	      106		not yet		  101.7
+C_13	      124		not yet		  127.6
+C_33	      181		not yet		  185.7
+C_44	       35		not yet		   40.2
+C_66	       55		not yet		   58.4
+s_11	        3.0		not yet		    3.1
+s_12	       -0.2		not yet		   -0.1
+s_13	       -2.0		not yet		   -2.0
+s_33	        8.2		not yet		    8.2
+s_44	       28.3		not yet		   24.9
+s_66	       18.1		not yet		   17.1
+K_V	      191		not yet		  192
+K_R	      164		not yet		  168
+G_V	       69		not yet		   72
+G_R	       50		not yet		   55
+K_{VRH}	      178		not yet		  180
+G_{VRH}	       60		not yet		   63
+A^U*	        2.00		not yet		    1.69
+mu*	        0.35		not yet		    0.34
+
+Piezoelectric properties in C/m^2
+
+	Materials Project     v5.4-smart	v6.0-smart	v6.0-s-Van*
+-------------------------------------------------------------------------------
+e_31	      2.51731		not yet		  2.42782	  2.38457
+e_33	      0.97436		not yet		  1.54440	  1.54542
+e_24	      4.70100 		not yet		  2.47314	  2.47503
+
+*Based on methodology of Vanderbilt, 1999
+
+
+==================================================================================
+				VBO4
+==================================================================================
+
+Relaxed properties (lattice constants in Ang, rho in g/cm^3)
+
+	Materials Project	v5.4-smart	v6.0-smart	Expt
+-------------------------------------------------------------------------------
+a0	      4.882		not yet		  ?
+c0	      5.040 (7.344)	not yet		  ?
+rho	      2.39		not yet		  ?
+
+Elastic properties in GPa (*unitless)
+
+	Materials Project	v5.4-smart	v6.0-smart	Expt
+-------------------------------------------------------------------------------
+C_11	       63		not yet		  ?
+C_12	      -29		not yet		  ?
+C_13	       13		not yet		  ?
+C_33	       90		not yet		  ?
+C_44	       19		not yet		  ?
+C_66	       29		not yet		  ?
+s_11	       21.7		not yet		  ?
+s_12	       10.9		not yet		  ?
+s_13	       -4.8		not yet		  ?
+s_16		0.2		not yet		  ?
+s_33	       12.5		not yet		  ?
+s_44	       52.0		not yet		  ?
+s_66	       35.0		not yet		  ?
+K_V	       24		not yet		  ?
+K_R	       17		not yet		  ?
+G_V	       28		not yet		  ?
+G_R	       24		not yet		  ?
+K_{VRH}	       20		not yet		  ?
+G_{VRH}	       26		not yet		  ?
+A^U*	        1.32		not yet		  ?
+mu*	        0.05		not yet		  ?
+
+Piezoelectric properties in C/m^2
+
+	Materials Project     v5.4-smart	v6.0-smart	v6.0-s-Van*
+-------------------------------------------------------------------------------
+e_31	      0.07136		not yet		 ?		 ?
+e_14	     -0.04784		not yet		 ?		 ?
+e_24	      0.08997		not yet		 ?		 ?
+e_36	      0.00273		not yet		 ?		 ?
+
+*Based on methodology of Vanderbilt, 1999
+
+
+==================================================================================
+				BAsO4
+==================================================================================
+
+Relaxed properties (lattice constants in Ang, rho in g/cm^3)
+
+	Materials Project	v5.4-smart	v6.0-smart	Expt
+-------------------------------------------------------------------------------
+a0	      4.586		not yet		  ?
+c0	      4.727 (6.878)	not yet		  ?
+rho	      3.44		not yet		  ?
+
+Elastic properties in GPa (*unitless)
+
+	Materials Project	v5.4-smart	v6.0-smart	Expt
+-------------------------------------------------------------------------------
+C_11	      105		not yet		  ?
+C_12	      -16		not yet		  ?
+C_13	       38		not yet		  ?
+C_33	       99		not yet		  ?
+C_44	       51		not yet		  ?
+C_66	       37		not yet		  ?
+s_11	       12.6		not yet		  ?
+s_12	        4.3		not yet		  ?
+s_13	       -6.5		not yet		  ?
+s_16		0.2		not yet		  ?
+s_33	       15.1		not yet		  ?
+s_44	       19.1		not yet		  ?
+s_66	       27.4		not yet		  ?
+K_V	       48		not yet		  ?
+K_R	       44		not yet		  ?
+G_V	       44		not yet		  ?
+G_R	       38		not yet		  ?
+K_{VRH}	       46		not yet		  ?
+G_{VRH}	       41		not yet		  ?
+A^U*	        0.93		not yet		  ?
+mu*	        0.16		not yet		  ?
+
+Piezoelectric properties in C/m^2
+
+	Materials Project     v5.4-smart	v6.0-smart	v6.0-s-Van*
+-------------------------------------------------------------------------------
+e_31	      0.37172 		not yet		 ?		 ?
+e_14	     -0.02250 		not yet		 ?		 ?
+e_24	     -0.15198		not yet		 ?		 ?
+e_36	     -0.34298		not yet		 ?		 ?
+
+*Based on methodology of Vanderbilt, 1999
+
+
+==================================================================================
+				AlAsO4
+==================================================================================
+
+Relaxed properties (lattice constants in Ang, rho in g/cm^3)
+
+	Materials Project	v5.4-smart	v6.0-smart	Expt
+-------------------------------------------------------------------------------
+a0	      5.283 (5.170)	not yet		  ?
+c0	      5.283 (7.627)	not yet		  ?
+rho	      2.70		not yet		  ?
+
+Elastic properties in GPa (*unitless)
+
+	Materials Project	v5.4-smart	v6.0-smart	Expt
+-------------------------------------------------------------------------------
+C_11	       57		not yet		  ?
+C_12	      -10		not yet		  ?
+C_13	       19		not yet		  ?
+C_33	       51		not yet		  ?
+C_44	       19		not yet		  ?
+C_66	       18		not yet		  ?
+s_11	       22.5		not yet		  ?
+s_12	        7.7		not yet		  ?
+s_13	      -11.3		not yet		  ?
+s_16		0.3		not yet		  ?
+s_33	       28.0		not yet		  ?
+s_44	       53.2		not yet		  ?
+s_66	       56.3		not yet		  ?
+K_V	       25		not yet		  ?
+K_R	       23		not yet		  ?
+G_V	       20		not yet		  ?
+G_R	       18		not yet		  ?
+K_{VRH}	       24		not yet		  ?
+G_{VRH}	       19		not yet		  ?
+A^U*	        0.74		not yet		  ?
+mu*	        0.18		not yet		  ?
+
+Piezoelectric properties in C/m^2
+
+	Materials Project     v5.4-smart	v6.0-smart	v6.0-s-Van*
+-------------------------------------------------------------------------------
+e_31	     -0.15207 		not yet		 ?		 ?
+e_14	      0.03780 		not yet		 ?		 ?
+e_24	      0.08615		not yet		 ?		 ?
+e_36	      0.22270		not yet		 ?		 ?
+
+*Based on methodology of Vanderbilt, 1999
+
+
+==================================================================================
+				InPS4
+==================================================================================
+
+Relaxed properties (lattice constants in Ang, rho in g/cm^3)
+
+	Materials Project	v5.4-smart	v6.0-smart	Expt
+-------------------------------------------------------------------------------
+a0	      5.772		not yet		  ?
+c0	      6.175 (9.268)	not yet		  ?
+rho	      2.95		not yet		  ?
+
+Elastic properties in GPa (*unitless)
+
+	Materials Project	v5.4-smart	v6.0-smart	Expt
+-------------------------------------------------------------------------------
+C_11	      not yet		not yet		  ?
+C_12	      not yet		not yet		  ?
+C_13	      not yet		not yet		  ?
+C_33	      not yet		not yet		  ?
+C_44	      not yet		not yet		  ?
+C_66	      not yet		not yet		  ?
+s_11	      not yet		not yet		  ?
+s_12	      not yet		not yet		  ?
+s_13	      not yet		not yet		  ?
+s_33	      not yet		not yet		  ?
+s_44	      not yet		not yet		  ?
+s_66	      not yet		not yet		  ?
+K_V	      not yet		not yet		  ?
+K_R	      not yet		not yet		  ?
+G_V	      not yet		not yet		  ?
+G_R	      not yet		not yet		  ?
+K_{VRH}	      not yet		not yet		  ?
+G_{VRH}	      not yet		not yet		  ?
+A^U*	      not yet		not yet		  ?
+mu*	      not yet		not yet		  ?
+
+Piezoelectric properties in C/m^2
+
+	Materials Project     v5.4-smart	v6.0-smart	v6.0-s-Van*
+-------------------------------------------------------------------------------
+e_31	     -0.16604		not yet		 ?		 ?
+e_14	      0.02632 		not yet		 ?		 ?
+e_24	      0.00577		not yet		 ?		 ?
+e_36	     -0.14206		not yet		 ?		 ?
+
+*Based on methodology of Vanderbilt, 1999
+
+
+============================================================================================================
+					 BN
+============================================================================================================
+
+Relaxed properties (lattice constants in Ang, rho in g/cm^3)
+
+	Materials Project	v6.0-smart	v6.0-s-kgrid	Expt
+----------------------------------------------------------------------------------------------------------
+a0	      2.555		  2.5527	  2.5525
+c0	      4.225		  4.2213	  4.2214
+rho	      3.45		  3.4598	  3.460
+
+Elastic properties in GPa
+
+	Materials Project	v6.0-smart	v6.0-s-kgrid
+----------------------------------------------------------------------------------------------------------
+C_11	      929		  928.2      	  928.8     
+C_12	      130		  129.6      	  129.4      
+C_13	       57		   57.9      	   57.9
+C_33	     1013		 1013.1      	 1014.0
+C_44	      329		  331.0      	  331.5      
+s_11	        1.1		    1.1      	    1.1
+s_12	       -0.2		   -0.2      	   -0.2
+s_13	       -0.1		   -0.1      	   -0.1
+s_33	        1.0		    1.0      	    1.0
+s_44	        3.0		    3.0      	    3.0
+K_V	      373		  373      	  374
+K_R	      373		  373      	  374
+G_V	      387		  387      	  388
+G_R	      380		  380      	  381
+K_{VRH}	      373		  373      	  374
+G_{VRH}	      383		  383      	  384
+A^U*	        0.10		    0.09      	    0.09
+mu*	        0.12		    0.12      	    0.12
+*  unitless
+
+
+Piezoelectric properties in C/m^2
+
+	Materials Project	v6.0-smart	v6.0-s-Van	v6.0-s-kgrid	v6.0-s-kg-V
+-----------------------------------------------------------------------------------------------------------
+e_31	      0.40327		  1.12476	 0.39859	 1.12476	 0.39811
+e_33	     -1.09478		 -1.08938	-1.09017	-1.08720	-1.08868
+e_14	      0.00000		  0.21482	 0.10765	 0.21639	 0.10851
+e_15	      0.39360		  0.37205	 0.37260	 0.37481	 0.37470
+
+
+============================================================================================================
+					 AlN
+============================================================================================================
+
+
+Relaxed properties (lattice constants in Ang, rho in g/cm^3)
+
+	Materials Project	v6.0-kpt8-12	v6.0-s mp2	v6.0-smart	v6.0-s-kgrid	Expt
+----------------------------------------------------------------------------------------------------------
+a0	      3.129		  3.1304	  3.1307	  3.1307	  3.1309	3.112**	
+c0	      5.017		  5.0190	  5.0187	  5.0187	  5.0192	4.982**
+rho	      3.20		  3.19581	  3.19545	  3.19545	  3.195		3.255**
+
+** Foundations of Nanomechanics: From Solid-State Theory to Device Applications
+
+Elastic properties in GPa
+
+	Materials Project	v6.0-kpt8-12	v6.0-s mp2	v6.0-smart	v6.0-s-kgrid	Expt
+----------------------------------------------------------------------------------------------------------
+C_11	      376		  375.9		  376.4		  376.3		  375.6		345**
+C_12	      129		128.6		  128.5		  128.3		  128.4		125**
+C_13	       98		100.5		  100.0		  100.4		  100.4		120**
+C_33	      353		356.2		  354.7		  354.3		  355.8		395**
+C_44	      113		111.5		  111.2		  111.3		  111.1		118**
+s_11	       3.1		  3.1		    3.1		    3.1		    3.1
+s_12	      -0.9		 -0.9		   -0.9		   -0.9		   -0.9
+s_13	      -0.6		 -0.6		   -0.6		   -0.6		   -0.6
+s_33	       3.2		  3.2		    3.2		    3.2		    3.2
+s_44	       8.9		  9.0		    9.0		    9.0		    9.0
+K_V	      195		 196		   196		  196  		  196
+K_R	      194		 196		   195		  195  		  196
+G_V	      122		 121		   121		  121  		  121
+G_R	      121		 120		   120		  120  		  120
+K_{VRH}	      194		 196		   196		  196  		  196
+G_{VRH}	      122		 121		   121		  121  		  121
+A^U*	       0.03		  0.03		    0.04	    0.03	    0.03
+mu*	       0.24		  0.24		    0.24	    0.24	    0.24
+*  unitless
+** Foundations of Nanomechanics: From Solid-State Theory to Device Applications
+
+Piezoelectric properties in C/m^2
+
+	Materials Project     v6.0-kpt8-12	v6.0-s mp2	v6.0-smart	Bernardini*	v6.0-s-Bern	v6.0-s-Van**	
+---------------------------------------------------------------------------------------------------------------------------------
+e_31	     -0.58006		-0.05870	-0.04660	-0.05522	   -0.60	-0.29257	-0.61647
+e_33	      1.46115		 1.45582	 1.48736	 1.49378	    1.46	 1.49155	 1.49493
+e_14	      0.00000		-0.18996	-0.19862	-0.19511	    n/a		   n/a		-0.09773
+e_15	     -0.28931		-0.32905	-0.34406	-0.33794	    n/a		   n/a		-0.33814
+
+	Materials Project	v6.0-s-kgrid	v6.0-s-kg-V
+-------------------------------------------------------------
+e_31	     -0.58006 		 -0.05880	-0.61905
+e_33	      1.46115		  1.45504	 1.4559
+e_14	      0.00000		 -0.20099	-0.10066
+e_15	     -0.28931		 -0.34813	-0.34848
+
+*Bernardini, 1997
+*Based on methodology of Vanderbilt, 1999
+
+
+============================================================================================================
+					 GaN
+============================================================================================================
+
+Relaxed properties (lattice constants in Ang, rho in g/cm^3)
+
+	Materials Project	v6.0-smart***	v6.0-s-kgrid***	Expt
+----------------------------------------------------------------------------------------------------------
+a0	      3.216		  3.2166	  3.2166	3.189**	
+c0	      5.240		  5.2403	  5.2405	5.185**
+rho	      5.92		  5.92		  5.92		6.095
+
+** Foundations of Nanomechanics: From Solid-State Theory to Device Applications
+*** Variable-cell relaxation did not converge well (STOP 3)
+
+
+Elastic properties in GPa
+
+	Materials Project	v6.0-smart***	v6.0-s-kgrid***	Expt
+----------------------------------------------------------------------------------------------------------
+C_11	      325		  325.7		  325.4		374**
+C_12	      112		  112.9		  113.1		106**
+C_13	       78		   80.3		   80.2		70**
+C_33	      358		  358.2		  357.6		379**
+C_44	       90		   89.6		   89.6		101**
+s_11	       3.6		    3.6		    3.6
+s_12	      -1.1		   -1.1		   -1.1
+s_13	      -0.5		   -0.6		   -0.6
+s_33	       3.0		    3.0		    3.0
+s_44	      11.1		   11.2		   11.2
+K_V	      172		  173		  173
+K_R	      172		  173		  173
+G_V	      107		  106		  106
+G_R	      104		  103		  103
+K_{VRH}	      172		  173		  173
+G_{VRH}	      105		  105		  105
+A^U*	       0.13		    0.13	    0.13
+mu*	       0.25		    0.25	    0.25
+*  unitless
+
+** Foundations of Nanomechanics: From Solid-State Theory to Device Applications
+*** Variable-cell relaxation did not converge well (STOP 3)
+
+Piezoelectric properties in C/m^2	
+
+	Materials Project	v6.0-s-1/2	v6.0-s-V-1/2	v6.0-s-kg-1/2	v6.0-s-k-V-1/2	Expt
+------------------------------------------------------------------------------------------------------------
+e_31	     -0.28982 		  1.66691	 0.35907	 1.64682	 0.33973
+e_33	      0.46451		 -0.56155	-0.56144	-0.57573	-0.57542
+e_14	      0.00000		  0.12867	 0.06451	 0.12348	 0.06176
+e_15	     -0.13932		  0.22291	 0.22302	 0.21385	 0.21411
+
+*** Variable-cell relaxation did not converge well (STOP 3)
+
+
+============================================================================================================
+					 InN
+============================================================================================================
+
+Relaxed properties (lattice constants in Ang, rho in g/cm^3)
+
+	Materials Project	v6.0-smart	v6.0-s-kgrid	Expt
+----------------------------------------------------------------------------------------------------------
+a0	      3.584		  3.5789	  3.5782	3.54**	
+c0	      5.791		  5.7823	  5.7821	5.705**
+rho	      6.64		  6.670		  6.673		6.880**
+** Foundations of Nanomechanics: From Solid-State Theory to Device Applications
+
+Elastic properties in GPa
+
+	Materials Project	v6.0-smart	v6.0-s-kgrid***	Expt
+----------------------------------------------------------------------------------------------------------
+C_11	      not yet		  195.1		  199.2	       190 +/- 7**
+C_12	      not yet		   98.9		   95.9	       104 +/- 3**
+C_13	      not yet		   75.4		   74.9	       121 +/- 7**
+C_33	      not yet		  206.3		  211.3	       182 +/- 6**
+C_44	      not yet		   42.9		   45.8	        10 +/- 1**
+s_11	      not yet		    7.3		    6.9
+s_12	      not yet		   -3.1		   -2.8
+s_13	      not yet		   -1.5		   -1.5
+s_33	      not yet		    6.0		    5.8
+s_44	      not yet		   23.3		   21.8
+K_V	      not yet		  122		  122
+K_R	      not yet		  122		  122
+G_V	      not yet		   50		   53
+G_R	      not yet		   49		   52
+K_{VRH}	      not yet		  122		  122
+G_{VRH}	      not yet		   49		   52
+A^U*	      not yet		    0.14	    0.12
+mu*	      not yet		    0.32	    0.31
+
+*  unitless
+** Sheleg & Savastenko (1979) [can't access], Wright (1997) [can't access, used ab initio PPs and PWs!]
+** Foundations of Nanomechanics: From Solid-State Theory to Device Applications
+Also see www.iue.tuwien.ac.at/phd/vitanov/node37.html
+***C_44 bad fit with STOP2
+
+
+Piezoelectric properties in C/m^2 (e_33 of R^2=0.88)
+
+	Materials Project	v6.0-s-.5a	v6.0-s-V-.5a	v6.0-s-kg-.5a	v6.0-s-k-V-.5a	Expt
+------------------------------------------------------------------------------------------------------------
+e_31	     -0.45301 		  ?.?????	 ?.?????	 1.38750	 0.32976
+e_33	      0.87696		  ?.?????	 ?.?????	-0.68762	-0.68773
+e_15	     -5.55115		  ?.?????	 ?.?????	 0.42417	 0.42463
+
+	Materials Project	v6.0-s-.5b	v6.0-s-V-.5b	v6.0-s-kg-.5b	v6.0-s-k-V-.5b	Expt
+------------------------------------------------------------------------------------------------------------
+e_31	     -0.45301 		  ?.?????	 ?.?????	 1.92000	 0.90138
+e_33	      0.87696		  ?.?????	 ?.?????	-0.41857	-0.41784
+e_15	     -5.55115		  ?.?????	 ?.?????	 0.47800	 0.47792
+
+
+============================================================================================================
+					 TlN
+============================================================================================================
+
+Relaxed properties (lattice constants in Ang, rho in g/cm^3)
+
+	Materials Project	v6.0-smart	v6.0-s-kgrid	Expt
+----------------------------------------------------------------------------------------------------------
+a0	      3.730		  3.7303	  3.7303
+c0	      6.086		  6.0454	  6.0514
+rho	      9.89		  9.956		  9.946
+
+Elastic properties in GPa
+
+	Materials Project	v6.0-smart**	v6.0-s-kgrid
+----------------------------------------------------------------------------------------------------------
+C_11	      not yet		  141.8      	  143.9
+C_12	      not yet		   77.3       	   74.5     
+C_13	      not yet		   55.5      	   54.5
+C_33	      not yet		  153.4      	  155.8
+C_44	      not yet		   23.9      	   31.2
+s_11	      not yet		   10.5      	   10.0
+s_12	      not yet		   -5.0     	   -4.4
+s_13	      not yet		   -2.0      	   -1.9
+s_33	      not yet		    8.0      	    7.8
+s_44	      not yet		   41.9      	   32.1
+K_V	      not yet		   90     	   90
+K_R	      not yet		   90      	   90
+G_V	      not yet		   33      	   37
+G_R	      not yet		   30      	   35
+K_{VRH}	      not yet		   90      	   90
+G_{VRH}	      not yet		   31      	   36
+A^U*	      not yet		    0.39     	    0.18
+mu*	      not yet		    0.34     	    0.32
+
+*  unitless
+** C_44 bad fit with scf STOP 2
+
+Piezoelectric properties in C/m^2 <-- TlN is a conductor!
+
+	Materials Project	v6.0-smart		v6.0-s-Van		v6.0-s-kgrid		v6.0-s-kg-V
+------------------------------------------------------------------------------------------------------------------------------
+e_31	      0.00000		  3.66494 (R^2=0.0006)	 2.72973 (R^2=0.0003)  106.58172 (R^2=0.5126)  106.76004 (R^2=0.5081)
+e_33	      0.00000		-55.08998 (R^2=0.0912) -55.13116 (R^2=0.0912)  -53.40648 (R^2=0.1280)  -53.44636 (R^2=0.1280)
+e_15	      0.00000		 -2.01599 (R^2=0.6831)	-2.01743 (R^2=0.6831)   -1.15576 (R^2=0.6458)	-1.15676 (R^2=0.6458)
+
+
+==================================================================================
+				BaGeO3
+==================================================================================
+
+Relaxed properties (lattice constants in Ang, rho in g/cm^3)
+
+	Materials Project	v6.0-smart	v6.0-s-kgrid	Expt
+-------------------------------------------------------------------------------
+a0	      4.682		  ?.???		  ?.???
+b0	      5.186		  ?.???		  ?.???
+c0	     13.103		  ?.???		  ?.???
+rho	      4.80		  ?.??		  ?.??
+
+Elastic properties in GPa (*unitless)
+
+	Materials Project	v6.0-smart	v6.0-s-kgrid	Expt
+-------------------------------------------------------------------------------
+C_11	      not yet		  ???.?		  ???.?
+C_12	      not yet		  ???.?		  ???.?
+C_13	      not yet		  ???.?		  ???.?
+C_22	      not yet		  ???.?		  ???.?
+C_23	      not yet		  ???.?		  ???.?
+C_33	      not yet		  ???.?		  ???.?
+C_44	      not yet		  ???.?		  ???.?
+C_55	      not yet		  ???.?		  ???.?
+C_66	      not yet		  ???.?		  ???.?
+s_11	      not yet		  ???.?		  ???.?
+s_12	      not yet		  ???.?		  ???.?
+s_13	      not yet		  ???.?		  ???.?
+s_22	      not yet		  ???.?		  ???.?
+s_23	      not yet		  ???.?		  ???.?
+s_33	      not yet		  ???.?		  ???.?
+s_44	      not yet		  ???.?		  ???.?
+s_55	      not yet		  ???.?		  ???.?
+s_66	      not yet		  ???.?		  ???.?
+K_V	      not yet		  ???.?		  ???.?
+K_R	      not yet		  ???.?		  ???.?
+G_V	      not yet		  ???.?		  ???.?
+G_R	      not yet		  ???.?		  ???.?
+K_{VRH}	      not yet		  ???.?		  ???.?
+G_{VRH}	      not yet		  ???.?		  ???.?
+A^U*	      not yet		  ???.?		  ???.?
+mu*	      not yet		  ???.?		  ???.?
+
+Piezoelectric properties in C/m^2
+
+	Materials Project	v6.0-smart	v6.0-s-Van	v6.0-s-kgrid	v6.0-s-kg-V
+------------------------------------------------------------------------------------------------
+e_31	      not yet 		 ?.?????	 ?.?????	 ?.?????	 ?.?????
+e_32	      not yet 		 ?.?????	 ?.?????	 ?.?????	 ?.?????
+e_33	      not yet 		 ?.?????	 ?.?????	 ?.?????	 ?.?????
+e_24	      not yet 		 ?.?????	 ?.?????	 ?.?????	 ?.?????
+e_15	      not yet 		 ?.?????	 ?.?????	 ?.?????	 ?.?????	
+
+
+==================================================================================
+				BaTiO3 (rhombohedral but hexagonal unit cell)
+==================================================================================
+
+Relaxed properties (lattice constants in Ang, rho in g/cm^3)
+
+	Materials Project	v5.4-smart	v6.0-smart	v6.0-s-prim*	v6.0-s-p-kg*	
+----------------------------------------------------------------------------------------------
+a0	      4.077		not yet		  5.7441	  4.0732	  4.0731
+c0	      4.077		not yet		  7.0905	  4.0732	  4.0731
+rho	      5.71		not yet		  5.7337	  5.730		  5.731
+*primitive cell is cubic
+
+Elastic properties in GPa (*unitless)
+
+	Materials Project	v5.4-smart	v6.0-smart	v6.0-s-prim	v6.0-s-p-kg	
+-----------------------------------------------------------------------------------------------
+C_11	      223		not yet		  225.0		  115.7		  115.7
+C_12	       61		not yet		   61.2		   89.3		   89.4
+C_13	       24		not yet		   27.2		   89.3		   89.4
+C_14	      -38		not yet		  -38.8		    2.5		    2.5
+C_16		0		not yet		    0.0		  -10.3		  -10.3
+C_33	      198		not yet		  205.1		  116.4		  116.3
+C_34		0		not yet		    0.0		  -11.2		  -11.1
+C_44	       33		not yet		   36.8		  101.1		  100.9
+C_46		0		not yet		    0.0		   -1.9		   -2.1
+C_66	       81		not yet		   81.9		   13.2		   13.1
+s_11	        8.7		not yet		    7.9		   36.2		   36.5
+s_12	       -5.1		not yet		   -4.3		  -14.6		  -14.8
+s_13	       -0.4		not yet		   -0.5		  -17.4		  -17.5
+s_14	       16		not yet		   12.9		   -2.6		   -2.5
+s_16		0		not yet		    0.0		   30.9		   31.3
+s_33	        5.2		not yet		    5.0		   30.7		   30.8
+s_34		0		not yet		    0.0		    3.2		    3.2
+s_44	       67.3		not yet		   54.3		   10.3		   10.3
+s_46		0		not yet		    0.0		   -1.1		   -1.0
+s_66	       27.5		not yet		   24.4		  103.5		  104.6
+K_V	       96		not yet		   98		   98		   98
+K_R	       94		not yet		   98		   97		   97
+G_V	       65		not yet		   67		   48		   48
+G_R	       25		not yet		   30		   16		   16
+K_{VRH}	       95		not yet		   98		   98		   98
+G_{VRH}	       45		not yet		   48		   32		   32
+A^U*	        8.03		not yet		    6.26	    9.85	    9.93
+mu*	        0.30		not yet		    0.29	    0.35	    0.35
+
+Piezoelectric properties in C/m^2
+
+	Materials Project	v6.0-smart	v6.0-s-p	v6.0-s-p-V	v6.0-s-p-kg	v6.0-s-p-kg-V
+--------------------------------------------------------------------------------------------------------------
+e_11	      0.00000		 0.79971	 4.31082	 2.18025	 4.32538	 2.18746
+e_31	     -2.15626 		 2.20026	-0.73470	-0.22295	-0.73798	-0.22431
+e_22	     -1.67299		 0.00000	 0.73560	 0.22451	 0.73882	 0.22588
+e_13	      0.00000		 0.00000	-0.74800	-0.23194	-0.73320	-0.22433
+e_23	      0.00000		 0.00000	-0.74522	-0.22926	-0.73698	-0.22500
+e_33	     -3.36391		 2.53130	 4.30046	 2.15260	 4.30070	 2.15272
+e_14	      0.00000		 0.00000	-0.24622	-0.12456	-0.25286	-0.12788
+e_34	      0.00000		 0.00000	 0.42596	 0.21242	 0.42116	 0.21002
+e_15	     -3.58207		 2.97000	 0.38938	 0.19596	 0.39632	 0.19937
+e_36	      0.00000		 0.00000	-0.73560	-0.22451	-0.73882	-0.22588
+
+
+==================================================================================
+				BaTiO3 (orthorhombic)
+==================================================================================
+
+Relaxed properties (lattice constants in Ang, rho in g/cm^3)
+
+	Materials Project	v6.0-smart	v6.0-s-kgrid	Expt
+-------------------------------------------------------------------------------
+a0	      3.988		  ?.???		  ?.???
+b0	      4.123		  ?.???		  ?.???
+c0	      4.123		  ?.???		  ?.???
+rho	      5.71		  ?.??		  ?.??
+
+Elastic properties in GPa (*unitless)
+
+	Materials Project	v6.0-smart	v6.0-s-kgrid	Expt
+-------------------------------------------------------------------------------
+C_11	      208		  ???.?		  ???.?
+C_12	       -6		  ???.?		  ???.?
+C_13	       89		  ???.?		  ???.?
+C_22	      161		  ???.?		  ???.?
+C_23	       85		  ???.?		  ???.?
+C_33	      257		  ???.?		  ???.?
+C_44	       88		  ???.?		  ???.?
+C_55	      108		  ???.?		  ???.?
+C_66	       13		  ???.?		  ???.?
+s_11	        6		  ???.?		  ???.?
+s_12	       1.6		  ???.?		  ???.?
+s_13	      -2.6		  ???.?		  ???.?
+s_22	        8		  ???.?		  ???.?
+s_23	      -3.2		  ???.?		  ???.?
+s_33	       5.9		  ???.?		  ???.?
+s_44	      11.4		  ???.?		  ???.?
+s_55	       9.2		  ???.?		  ???.?
+s_66	      78.5		  ???.?		  ???.?
+K_V	      107		  ???.?		  ???.?
+K_R	       88		  ???.?		  ???.?
+G_V	       72		  ???.?		  ???.?
+G_R	       38		  ???.?		  ???.?
+K_{VRH}	       97		  ???.?		  ???.?
+G_{VRH}	       55		  ???.?		  ???.?
+A^U*	       4.70		  ???.?		  ???.?
+mu*	       0.26		  ???.?		  ???.?
+
+Piezoelectric properties in C/m^2
+
+	Materials Project	v6.0-smart	v6.0-s-Van	v6.0-s-kgrid	v6.0-s-kg-V
+------------------------------------------------------------------------------------------------
+e_31	      2.24411 		 ?.?????	 ?.?????	 ?.?????	 ?.?????
+e_32	      0.69252 		 ?.?????	 ?.?????	 ?.?????	 ?.?????
+e_33	      3.43676 		 ?.?????	 ?.?????	 ?.?????	 ?.?????
+e_24	      0.00000 		 ?.?????	 ?.?????	 ?.?????	 ?.?????
+e_15	     -1.30243 		 ?.?????	 ?.?????	 ?.?????	 ?.?????
+
+
+==================================================================================
+				BaTiO3 (tetragonal)
+==================================================================================
+
+Relaxed properties (lattice constants in Ang, volume in Ang^3, rho in g/cm^3)
+
+	Materials Project	v5.4-smart	v6.0-smart	v6.0-s-kgrid
+-------------------------------------------------------------------------------
+a0	      4.002		  3.9945	  3.9940	  3.9938
+c0	      4.216		  4.2216	  4.2231	  4.2230
+volume	     67.516		 67.3597	 67.3672	 67.3568
+rho	      5.74		  5.749	  	  5.748		  5.749
+
+Elastic properties in GPa (*unitless)
+
+	Materials Project	v5.4-smart	v6.0-smart**	v6.0-s-kgrid**
+---------------------------------------------------------------------------------
+C_11	      260		  256.1		  255.8		  255.9
+C_12	      106		  106.3		  106.5		  106.7
+C_13	       77		   78.5		   79.7		   79.7
+C_33	       87		   91.6		   91.2		   91.1
+C_44	       82		   23.7		   23.8		   24.2
+C_66	      116		  116.2		  116.2		  116.2
+s_11	       5.4		    5.5		    5.6		    5.6
+s_12	      -1.1		   -1.1		   -1.1		   -1.1
+s_13	      -3.9		   -3.8		   -3.9		   -3.9
+s_33	      18.4		   17.4		   17.8		   17.8
+s_44	      12.3		   42.2		   41.9		   41.3
+s_66	      12.3		    8.6		    8.6		    8.6
+K_V	      125		   126		   126		  126
+K_R	       86		    90		    90		   90
+G_V	       79		    55		    55		   55
+G_R	       60		    35		    35		   35
+K_{VRH}	      106		   108		   108		  108
+G_{VRH}	       69		    45		    45		   45
+A^U*	       2.08		    3.29	    3.30	    3.25
+mu*	       0.23		    0.32	    0.32	    0.32
+**C_44 did not fit well
+
+Piezoelectric properties in C/m^2
+
+	Materials Project	v6.0-smart		v6.0-s-Van		v6.0-smart-kgrid	v6.0-s-kgrid-Van
+----------------------------------------------------------------------------------------------------------------------------
+e_31	      0.68030		-0.12320 (R^2=0.9348)	 0.17948 (R^2=0.9920)	-0.12446 (R^2=0.8700)	 0.17900 (R^2=0.9829)
+e_33	      3.48733		 2.71868 (R^2=0.9943)	 1.36030 (R^2=0.9944)	 2.71390 (R^2=0.9931)	 1.35788 (R^2=0.9931)	  
+e_15	      0.28265		21.87986 (R^2=0.9116)	10.94832 (R^2=0.9116)	21.82206 (R^2=0.9115)	10.91924 (R^2=0.9115)
+
+
+
+
+
+
+
+k-point-path for F-43m (216) band structure
+GM		X		W		K		GM		L
+0, 0, 0		0, 1/2, 0	1/4, 1/2, 0	3/8, 3/8, 3/8	0, 0, 0		1/4, 1/4, 1/4
+
+U		W		L		K	|	U		X
+1/8, 1/2, 1/8	1/4, 1/2, 0	1/4, 1/4, 1/4	3/8, 3/8, 0	1/8, 1/2, 1/8	0, 1/2, 0
+
+Cubic [F-43m] {rare-earth oxyfluoride} (?magnetic, !stable):  PrOF, NdOF, SmOF, YOF*
+Tetragonal [I41md] {5B-Rh oxide} (nonmagnetic, not stable): TaRhO4, NbRhO4, VRhO4 (known, +U)
+Tetragonal [I4] {6B-Li oxide} (nonmagnetic, not stable): Li4MoO5, Li4WO5
+Orthorhombic [Cmc21]
+
+
+Bands
+-----
+> How to determine nbnd or default?
+> How to de
+> Flow
+	VC Relax
+	SCF
+	PW Bands -> kpt path
+	Bands
+	Plot
+	- gridspec no. of divisions, width ratios
+	- plt.figure size
+	- how many subplot
+	- ax.plot
+	- division lines
+	- labels, also for ||
+	- tick locations
+	- setting ticks
+	- hiding spines
+	- spacing
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib import gridspec
+
+print "\nPlotting band structure."
+
+filename='$plotsave$filename'
+plotrange='$compile.$plotrange'
+output='$output'
+reflevel=$reflevel
+rydberg=$RytoeV
+bandsplot=$bands_plot
+
+Data = np.loadtxt('%s.bands.dat.gnu' % (filename), float)
+#Data = np.loadtxt('%s.bandstruct.dat.gnu' % (filename), float)
+xData = np.array(Data[:, 0], float)
+yData1 = (np.array(Data[:, 1], float)*rydberg - reflevel)
+plt.figure(num=1, figsize=(8, 10))
+
+#fig,(ax,ax2,ax3) = plt.subplots(1, 3, sharey=True)
+fig = plt.figure(figsize=(8, 6)) 
+gs = gridspec.GridSpec(1, 3, width_ratios=[3.7288, 0.5741, 0.5741]) 
+
+ax = plt.subplot(gs[0])
+plt.ylabel('$ E-E_{ref}\ (eV)$', size=20)
+ax2 = plt.subplot(gs[1])
+ax3 = plt.subplot(gs[2])
+
+# plot the same data on all axes
+ax.plot(xData, yData1, "b-")
+ax2.plot(xData, yData1, "b-")
+ax3.plot(xData, yData1, "b-")
+
+ax.plot((0.5774, 0.5774), (-10, 5), color='0')
+ax.plot((0.9107, 0.9107), (-10, 5), color='0')
+ax.plot((1.5773, 1.5773), (-10, 5), color='0')
+ax.plot((2.1515, 2.1515), (-10, 5), color='0')
+ax.plot((2.7288, 2.7288), (-10, 5), color='0')
+ax.plot((3.0621, 3.0621), (-10, 5), color='0')
+ax2.plot((3.7288, 3.7288), (-10, 5), color='0')
+ax2.plot((4.3062, 4.3062), (-10, 5), color='0')
+ax2.plot((4.8803, 4.8803), (-10, 5), color='0')
+ax3.plot((5.2136, 5.2136), (-10, 5), color='0')
+ax3.plot((5.7877, 5.7877), (-10, 5), color='0')
+
+label1 = ['$\Gamma$', '$ M$', '$ K$', '$\Gamma$', '$ A$', '$ L$', '$ H$', '$ A|L$']
+label2 = ['', '$ M|K$']
+label3 = ['', '$ H$']
+tick1 = [0.0000, 0.5774, 0.9107, 1.5773, 2.1515, 2.7288, 3.0621, 3.7288]
+tick2 = [4.3062, 4.8803]
+tick3 = [5.2136, 5.7877]
+ax.set_xticks(tick1)
+ax.set_xticklabels(label1)
+ax.xaxis.set_tick_params(size=0)
+ax.tick_params(labelsize=16)
+ax2.set_xticks(tick2)
+ax2.set_xticklabels(label2)
+ax2.set_yticks([''])
+ax2.xaxis.set_tick_params(size=0)
+ax2.tick_params(labelsize=16)
+ax3.set_xticks(tick3)
+ax3.set_xticklabels(label3)
+ax3.xaxis.set_tick_params(size=0)
+ax3.tick_params(labelsize=16)
+
+# zoom-in / limit the view to different portions of the data
+ax.set_xlim(0.0000, 3.7288)
+ax2.set_xlim(4.3062, 4.8803)
+ax3.set_xlim(5.2136, 5.7877)
+
+ax.set_ylim(9.5, 11)
+ax2.set_ylim(9.5, 11)
+ax3.set_ylim(9.5, 11)
+
+yticks = ax.get_yticks()
+ylabels = []
+for i in xrange(len(yticks)):
+	ylabels.append('$%d$' % yticks[i])
+ax.set_yticklabels(ylabels)
+
+yticks3 = ax3.get_yticks()
+ylabels3 = []
+for i in xrange(len(yticks3)):
+	ylabels3.append('$%d$' % yticks3[i])
+ax3.set_yticklabels(ylabels3)
+
+# hide the spines between ax and ax2
+ax.spines['right'].set_visible(False)
+ax2.spines['left'].set_visible(False)
+ax.yaxis.tick_left()
+ax.tick_params(labeltop='off') # don't put tick labels at the top
+#ax2.yaxis.tick_right()
+ax2.yaxis.set_major_formatter(plt.NullFormatter())
+
+ax2.spines['right'].set_visible(False)
+ax3.spines['left'].set_visible(False)
+#ax2.yaxis.tick_left()
+ax2.tick_params(labeltop='off') # don't put tick labels at the top
+ax3.yaxis.tick_right()
+
+# Make the spacing between the two axes a bit smaller
+plt.subplots_adjust(wspace=0.00)
+
+if bandsplot != []:
+	plt.savefig('%s.Bands.%s.pdf' % (filename, plotrange), format='pdf')
+plt.close()
+
+
+
+
+
+
+
+
+
+
+
+tick1 = [0.0000, 0.5774, 0.9107, 1.5773, 2.1515, 2.7288, 3.0621, 3.7288]
+tick2 = [4.3062, 4.8803]
+tick3 = [5.2136, 5.7877]
+
+
+GM	M	K	GM	A	L	H	A
+0.0000	0.5774	0.9107	1.5773	2.1515	2.7288	3.0621	3.7288
+
+L	M
+4.3062	4.8803
+
+K	H
+5.2136	5.7877
+
+
+How to reverse every other band
+
+(kpttot-1)*kptpathden+1
+
+> 
+> For every other element, reverse the chunk from 
+
+
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib import gridspec
+
+print "\nPlotting band structure."
+
+filename='$plotsave$filename'
+plotrange='$compile.$plotrange'
+output='$output'
+reflevel=$reflevel
+rydberg=$RytoeV
+bandsplot=$bands_plot
+banddiv=$banddiv
+
+Data = np.loadtxt('%s.bands.dat.gnu' % (filename), float)
+xData = np.array(Data[:, 0], float)
+yData = (np.array(Data[:, 1], float)*rydberg - reflevel)
+plt.figure(num=1, figsize=(8, 10))						#is this even needed
+
+fig = plt.figure(figsize=(8, 6)) 						#is this even needed
+gs = gridspec.GridSpec(1, $banddiv, width_ratios=[3.7288, 0.5741, 0.5741]) 
+
+ax = plt.subplot(gs[0])
+plt.ylabel('$ E-E_{ref}\ (eV)$', size=20)
+ax2 = plt.subplot(gs[1])
+ax3 = plt.subplot(gs[2])
+
+# plot the same data on all axes
+ax.plot(xData, yData, "b-")
+ax2.plot(xData, yData, "b-")
+ax3.plot(xData, yData, "b-")
+
+ax.plot((0.5774, 0.5774), (-10, 5), color='0')
+ax.plot((0.9107, 0.9107), (-10, 5), color='0')
+ax.plot((1.5773, 1.5773), (-10, 5), color='0')
+ax.plot((2.1515, 2.1515), (-10, 5), color='0')
+ax.plot((2.7288, 2.7288), (-10, 5), color='0')
+ax.plot((3.0621, 3.0621), (-10, 5), color='0')
+ax2.plot((3.7288, 3.7288), (-10, 5), color='0')
+ax2.plot((4.3062, 4.3062), (-10, 5), color='0')
+ax2.plot((4.8803, 4.8803), (-10, 5), color='0')
+ax3.plot((5.2136, 5.2136), (-10, 5), color='0')
+ax3.plot((5.7877, 5.7877), (-10, 5), color='0')
+
+label1 = ['$\Gamma$', '$ M$', '$ K$', '$\Gamma$', '$ A$', '$ L$', '$ H$', '$ A|L$']
+label2 = ['', '$ M|K$']
+label3 = ['', '$ H$']
+tick1 = [0.0000, 0.5774, 0.9107, 1.5773, 2.1515, 2.7288, 3.0621, 3.7288]
+tick2 = [4.3062, 4.8803]
+tick3 = [5.2136, 5.7877]
+ax.set_xticks(tick1)
+ax.set_xticklabels(label1)
+ax.xaxis.set_tick_params(size=0)
+ax.tick_params(labelsize=16)
+ax2.set_xticks(tick2)
+ax2.set_xticklabels(label2)
+ax2.set_yticks([''])
+ax2.xaxis.set_tick_params(size=0)
+ax2.tick_params(labelsize=16)
+ax3.set_xticks(tick3)
+ax3.set_xticklabels(label3)
+ax3.xaxis.set_tick_params(size=0)
+ax3.tick_params(labelsize=16)
+
+# zoom-in / limit the view to different portions of the data
+ax.set_xlim(0.0000, 3.7288)
+ax2.set_xlim(4.3062, 4.8803)
+ax3.set_xlim(5.2136, 5.7877)
+
+ax.set_ylim(9.5, 11)
+ax2.set_ylim(9.5, 11)
+ax3.set_ylim(9.5, 11)
+
+yticks = ax.get_yticks()
+ylabels = []
+for i in xrange(len(yticks)):
+	ylabels.append('$%d$' % yticks[i])
+ax.set_yticklabels(ylabels)
+
+yticks3 = ax3.get_yticks()
+ylabels3 = []
+for i in xrange(len(yticks3)):
+	ylabels3.append('$%d$' % yticks3[i])
+ax3.set_yticklabels(ylabels3)
+
+# hide the spines between ax and ax2
+ax.spines['right'].set_visible(False)
+ax2.spines['left'].set_visible(False)
+ax.yaxis.tick_left()
+ax.tick_params(labeltop='off') # don't put tick labels at the top
+#ax2.yaxis.tick_right()
+ax2.yaxis.set_major_formatter(plt.NullFormatter())
+
+ax2.spines['right'].set_visible(False)
+ax3.spines['left'].set_visible(False)
+#ax2.yaxis.tick_left()
+ax2.tick_params(labeltop='off') # don't put tick labels at the top
+ax3.yaxis.tick_right()
+
+# Make the spacing between the two axes a bit smaller
+plt.subplots_adjust(wspace=0.00)
+
+if bandsplot != []:
+	plt.savefig('%s.Bands.%s.pdf' % (filename, plotrange), format='pdf')
+plt.close()
+
+
+
+DOS.sh
+[X] no new Emax and no new nbnd -> did not show higher energy levels
+[X] no new Emax and new nbnd -> showed higher energy levels!
+[X] new Emax and no new nbnd -> did not show higher energy levels
+[X] new Emax and new nbnd -> showed higher energy levels!
+
+[ ] Energy range (in eV) -> should I do multiple plot ranges?
+	[ ] MP range: -4 to 9
+	[ ] wu2007:, connetable2009 -15 to 6
+	[ ] piskunov2004: -10 to 7
+	[ ] kanchana2009: -10 to 4
+	[ ] mattesini2009: -15 to 10
+	[ ] ninranjan2012: -12 to 6
+	[ ] hao2016: -16 to 5
+	[ ] zhao2017: -6 to 5
+	[ ] xu2017: -9 to 8
+
+
+For PP:
+[ ] Figure out how to calculate piezoelectric tensor for noncubic
+	[ ] Bernardini 1997
+		[ ] Calculate u
+		[ ] Try changing a-vector
+		[ ] Try calculating Bernardini e_31 and e_33
+		[ ] Try doing isotropic a-vector and b-vector at the same time
+
+
+
+
+
+
+Extra
+[ ] Chi-calcs
+	[ ] Reconstruct
+	[ ] Automate
+
+
+
+For Future
+[ ] Automate chi-calcs
+[ ] Fix range for berry-kpt
+
+
+
+
+
+
+
+2
